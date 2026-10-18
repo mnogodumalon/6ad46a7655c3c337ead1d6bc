@@ -1,0 +1,119 @@
+Legend: `!` after a field name = required (from the app's base view) —
+a step form that writes such a field must not submit it empty.
+`^` after a field name = shown in the app's list view: the fields users
+recognize a record by — prefer them for select-card titles, stats and recall texts.
+A field's human label follows in quotes where it adds information (`kosten[number] "Kosten (EUR)"`) —
+use the label in every user-facing text, never the identifier.
+A lookup field lists its keys after the type (`[lookup/select: a|b|c]`);
+these are the ONLY valid write values — quote them into the brief verbatim;
+`key=Label` shows the human label where it differs (write the key, show the label).
+`·` lines carry a field's description from the app model — real process
+knowledge: use it for step texts and "why we ask this" hints.
+`≡` = how many records the app held when this was built — CONTEXT only
+(spot empty entities, size the flow). It never chooses the data path: every
+pick-a-record step goes through useRecordSearch, which counts at RUNTIME and
+switches to server-side search when the entity has grown since the build
+(check-intents 3k rejects an EntitySelectStep fed from a useDashboardData array).
+`◈` names the input FORM each field shape wants — range → calendar
+(AvailabilityRangePicker via form.range), choice → pills (ChoiceGroup), record →
+select step (EntitySelectStep), stock → show the quantity, warn on overshoot.
+Pick the form that fits the data; a plain field only when nothing better exists.
+`⚙` lists the service methods for that entity, spelled exactly.
+`✚` lists the entity's Enriched* fields and its enrich() signature,
+spelled exactly — quote both verbatim; an invented enriched field or
+a missing map is a guaranteed type error.
+
+Modules — YOUR import map for the dashboard overview. NEVER paste this block,
+a module path, a hook signature or an app_id into a flow or page brief: the
+lanes read these files themselves through their skill, and a brief that
+prescribed them cost every lane a gate round (live 07.09.2026 — wrong vSQL
+and a `createRecordUrl` call copied into three flows). A brief carries the
+domain: steps, eligible records, fields as `name![type: keys]`, sentences.
+  @/types/app                            entity types, APP_IDS, LOOKUP_OPTIONS
+  @/types/enriched                       EnrichedVorhaben, EnrichedRegeln, EnrichedArbeitskontexte, EnrichedKiVorschlaege, EnrichedFreigaben, EnrichedTaetigkeiten, EnrichedErfahrungen — the COMPLETE list, no other Enriched* type exists
+  @/lib/enrich                           the enrich functions — exact fields and signatures on the `✚` line of each entity below; every listed map is REQUIRED, and no other enriched field exists
+  @/services/livingAppsService           LivingAppsService, createRecordUrl, extractRecordId — dashboard overview only; a flow writes through its plan (create) or `updates: id` (update), never through the service (gate 3z)
+  @/hooks/useDashboardData               useDashboardData — DASHBOARD OVERVIEW ONLY: the RAW arrays (one per entity, camelCase), their setters, loading, error, fetchAll. Never in a flow page (gate 3y): a flow reads through the journey layer (useRecordSearch, useOccupancy, x.recordOf) + arbeitskontexteMap, freigabenMap, kiModelleMap, kiVorschlaegeMap, nutzerMap, regelnMap, taetigkeitenMap, vorhabenMap; it carries NO enriched arrays — build those with the `✚` call below
+  @/lib/formatters                       lookupKey, formatDate
+  @/lib/journey                          useStepForm, useJourneySubmit (plan steps: create, or `updates: id` for a change; `link` for references), useRecordSearch (searchFields, filter, where; toItem OPTIONAL — the card is the display name; `(r, ctx) => ctx.ref('gast')` for a referenced record's name), useOccupancy (blocked · freeIn · isFree — availability through the door), useRecordCount (count — ONE number over many records: capacity, open items; never a second useRecordSearch for a count), fieldText, fieldLookup, fieldNumber, fieldDate, fieldRef, makeReference, SHAPES — validation, plan runner, reference, names; door-agnostic. There are NO `<key>Name` fields on a journey record.
+  @/services/journeyPort                 servicePort — the INTERNAL door of the journey port (list · create · update · ref); hand it to useJourneySubmit, useRecordSearch, useOccupancy and to blocks — every write goes through the plan
+  @/lib/polish                           undoToast — success toast with an undo action (every delete in a flow)
+  @/components/blocks/IntentWizardShell  IntentWizardShell, WizardStep (label, heading, needs=[field keys] renders the way back), useWizard — forms=, draftKey=, intro=
+  @/components/blocks/StepNav            StepNav — Back / Continue with the next step's name; onNext returns form.validate(...)
+  @/components/blocks/SummaryStep        SummaryStep — check-answers step before EVERY write (forms=, submit=)
+  @/components/blocks/SuccessStep        SuccessStep — final step from submit.result: reference, facts, next actions; submit= adds „Noch einmal“
+  @/components/blocks/ChoiceGroup        ChoiceGroup — pill radiogroup for a lookup with few options ({...form.choice(key)})
+  @/components/blocks/EntitySelectStep   EntitySelectStep — onSelect, selectedId; adapts cards/search-first to the count; ALWAYS fed via {...x.select} from useRecordSearch; „Neu anlegen“ is BUILT IN (the entity's required fields, created through the port) — never brief a hand-written mini-form
+  @/components/blocks/StatusBadge        StatusBadge, getStatusColor
+  @/components/blocks/BudgetTracker      BudgetTracker
+  @/components/blocks/AvailabilityRangePicker  AvailabilityRangePicker, rangeIsFree, isNightBlocked ({...form.range(from, to, { blocked })})
+There is NO `@/config/appIds`, no `@/config/lookupOptions` and no
+`@/lib/urlUtils` — APP_IDS and LOOKUP_OPTIONS come from `@/types/app`,
+createRecordUrl from the service. Note the lowercase `l` in the service path.
+
+- Nutzer (nutzer): vorname!^[string/text], nachname!^[string/text], email!^[string/email] "E-Mail", rolle!^[lookup/select: administrator|projektverantwortlicher|bearbeiter|entscheider|ausfuehrender], berechtigungsstufe!^[lookup/radio: stufe_1=Stufe 1 – Lesen|stufe_2=Stufe 2 – Vorschlagen|stufe_3=Stufe 3 – Freigeben|stufe_4=Stufe 4 – Regeln ändern], aktiv[bool]
+  ≡ 3 records at build time
+  ◈ rolle → choice (5 options, ChoiceGroup) · berechtigungsstufe → choice (4 options, ChoiceGroup)
+  ⚙ getNutzer() · getNutzerEntry(id) · createNutzerEntry(fields) · updateNutzerEntry(id, fields) · deleteNutzerEntry(id) · queryNutzer({ filter, orderby, limit, offset, fields }) · countNutzer(filter?)
+- KI-Modelle (ki_modelle): bezeichnung!^[string/text], anbieter^[string/text], version^[string/text], einsatzzweck^[string/textarea], faehigkeiten_einschraenkungen^[string/textarea] "Fähigkeiten und bekannte Einschränkungen", zuverlaessigkeit[lookup/select: niedrig|mittel|hoch] "Zuverlässigkeitseinschätzung", status![lookup/select: in_erprobung|im_einsatz|gesperrt|abgeloest]
+  ≡ 3 records at build time
+  ◈ zuverlaessigkeit → choice (3 options, ChoiceGroup) · status → choice (4 options, ChoiceGroup)
+  ⚙ getKiModelle() · getKiModelleEntry(id) · createKiModelleEntry(fields) · updateKiModelleEntry(id, fields) · deleteKiModelleEntry(id) · queryKiModelle({ filter, orderby, limit, offset, fields }) · countKiModelle(filter?)
+- Vorhaben (vorhaben): titel!^[string/text], ausgangssituation!^[string/textarea], ziel!^[string/textarea], kontext^[string/textarea], verantwortlicher!^[applookup/select], status![lookup/select: geplant|in_bearbeitung|abgeschlossen|abgebrochen], startdatum[date/date] "Start", enddatum[date/date] "Ende"
+  ≡ 3 records at build time
+  ◈ startdatum+enddatum → range candidate — YOU decide in .intents-staging/occupancy.json whether it is a stay, which applookup is the booked resource, which status keys do not occupy (AvailabilityRangePicker, form.range; blocked = occupancyFor()) · status → choice (4 options, ChoiceGroup) · verantwortlicher → record (nutzer, EntitySelectStep)
+  ⚙ getVorhaben() · getVorhabenEntry(id) · createVorhabenEntry(fields) · updateVorhabenEntry(id, fields) · deleteVorhabenEntry(id) · queryVorhaben({ filter, orderby, limit, offset, fields }) · countVorhaben(filter?)
+  ✚ EnrichedVorhaben adds ONLY verantwortlicherName — via enrichVorhaben(vorhaben, { nutzerMap }), all maps required
+  → verantwortlicher links to app_id 6ad46a36c850c7898a0a8333
+- Regeln (regeln): bezeichnung!^[string/text], beschreibung^[string/textarea], regeltyp!^[lookup/select: datenmodell|zustandsuebergang|geschaeftsregel|berechtigung|freigabe|abhaengigkeit|validierung|prozessbedingung], bedingung^[string/textarea], wirkung^[string/textarea], erforderliche_stufe![lookup/select: stufe_1=Stufe 1 – Lesen|stufe_2=Stufe 2 – Vorschlagen|stufe_3=Stufe 3 – Freigeben|stufe_4=Stufe 4 – Regeln ändern] "Erforderliche Berechtigungsstufe", gueltig_ab[date/date], status![lookup/select: entwurf|gueltig|abgeloest|ausser_kraft], verantwortlicher[applookup/select], vorgaengerregel[applookup/select]
+  ≡ 3 records at build time
+  ◈ erforderliche_stufe → choice (4 options, ChoiceGroup) · status → choice (4 options, ChoiceGroup) · verantwortlicher → record (nutzer, EntitySelectStep) · vorgaengerregel → record (regeln, EntitySelectStep)
+  ⚙ getRegeln() · getRegelnEntry(id) · createRegelnEntry(fields) · updateRegelnEntry(id, fields) · deleteRegelnEntry(id) · queryRegeln({ filter, orderby, limit, offset, fields }) · countRegeln(filter?)
+  ✚ EnrichedRegeln adds ONLY verantwortlicherName, vorgaengerregelName — via enrichRegeln(regeln, { nutzerMap, regelnMap }), all maps required
+  → verantwortlicher links to app_id 6ad46a36c850c7898a0a8333
+  → vorgaengerregel links to app_id 6ad46a40bd412c2559d0d8ea
+- Arbeitskontexte (arbeitskontexte): vorhaben!^[applookup/select], versionsnummer!^[number], aktueller_zustand!^[string/textarea], verwendete_informationen^[string/textarea], annahmen[string/textarea], gueltigkeitsstatus![lookup/radio: aktuell_gueltig|ueberholt], erfasst_von![applookup/select], zeitpunkt![date/datetimeminute], vorgaengerkontext^[applookup/select]
+  ≡ 3 records at build time
+  · zeitpunkt: A specific moment in time consisting of year, month, day, hour and minute (or `null`/`None`) The field value will be a string in the format `<YYYY>-<MM>-<DD>T<HH>:<MM>` (or `null`/`None`). For example: `2000-02-29T11:30`. For `POST`/`PUT`/`PATCH` requests the REST API uses a liberal parsing approach so that strings like `2026`, `February 29, 2000 12:34 MEST`, `letztes Jahr` etc. will be accepted as value datetime values. However this runs the risk of parsing ambiguous values incorrectly. To ensure reliable parsing it is best to use the canonical format specified above.
+  ◈ gueltigkeitsstatus → choice (2 options, ChoiceGroup) · vorhaben → record (vorhaben, EntitySelectStep) · erfasst_von → record (nutzer, EntitySelectStep) · vorgaengerkontext → record (arbeitskontexte, EntitySelectStep)
+  ⚙ getArbeitskontexte() · getArbeitskontexteEntry(id) · createArbeitskontexteEntry(fields) · updateArbeitskontexteEntry(id, fields) · deleteArbeitskontexteEntry(id) · queryArbeitskontexte({ filter, orderby, limit, offset, fields }) · countArbeitskontexte(filter?)
+  ✚ EnrichedArbeitskontexte adds ONLY vorhabenName, erfasst_vonName, vorgaengerkontextName — via enrichArbeitskontexte(arbeitskontexte, { vorhabenMap, nutzerMap, arbeitskontexteMap }), all maps required
+  → vorhaben links to app_id 6ad46a3f190edcba778818ee
+  → erfasst_von links to app_id 6ad46a36c850c7898a0a8333
+  → vorgaengerkontext links to app_id 6ad46a403c317a30877378d1
+- KI-Vorschläge (ki_vorschlaege): vorhaben!^[applookup/select], modell!^[applookup/select] "KI-Modell", art!^[lookup/select: hypothese|loesungsvorschlag|text|code|mustererkennung|entscheidungsvorbereitung|fehlersuche|regelaenderung] "Art des Vorschlags", inhalt!^[string/textarea], begruendung[string/textarea], status![lookup/select: vorgeschlagen|geprueft|abgelehnt|ausgefuehrt], arbeitskontext!^[applookup/select], betroffene_regel[applookup/select]
+  ≡ 3 records at build time
+  ◈ status → choice (4 options, ChoiceGroup) · vorhaben → record (vorhaben, EntitySelectStep) · modell → record (ki_modelle, EntitySelectStep) · arbeitskontext → record (arbeitskontexte, EntitySelectStep) · betroffene_regel → record (regeln, EntitySelectStep)
+  ⚙ getKiVorschlaege() · getKiVorschlaegeEntry(id) · createKiVorschlaegeEntry(fields) · updateKiVorschlaegeEntry(id, fields) · deleteKiVorschlaegeEntry(id) · queryKiVorschlaege({ filter, orderby, limit, offset, fields }) · countKiVorschlaege(filter?)
+  ✚ EnrichedKiVorschlaege adds ONLY vorhabenName, modellName, arbeitskontextName, betroffene_regelName — via enrichKiVorschlaege(kiVorschlaege, { vorhabenMap, kiModelleMap, arbeitskontexteMap, regelnMap }), all maps required
+  → vorhaben links to app_id 6ad46a3f190edcba778818ee
+  → modell links to app_id 6ad46a3d7361ef02a4331895
+  → arbeitskontext links to app_id 6ad46a403c317a30877378d1
+  → betroffene_regel links to app_id 6ad46a40bd412c2559d0d8ea
+- Freigaben (freigaben): entscheider!^[applookup/select], regelpruefung!^[lookup/radio: erfuellt=Regel erfüllt|nicht_erfuellt=Regel nicht erfüllt|berechtigung_fehlt] "Ergebnis der Regelprüfung", entscheidung!^[lookup/radio: freigegeben|abgelehnt|zurueckgestellt], begruendung[string/textarea], entscheidungszeitpunkt![date/datetimeminute] "Zeitpunkt der Entscheidung", wirksam_ab[date/datetimeminute], vorschlag!^[applookup/select], angewendete_regel!^[applookup/select]
+  ≡ 3 records at build time
+  · entscheidungszeitpunkt: A specific moment in time consisting of year, month, day, hour and minute (or `null`/`None`) The field value will be a string in the format `<YYYY>-<MM>-<DD>T<HH>:<MM>` (or `null`/`None`). For example: `2000-02-29T11:30`. For `POST`/`PUT`/`PATCH` requests the REST API uses a liberal parsing approach so that strings like `2026`, `February 29, 2000 12:34 MEST`, `letztes Jahr` etc. will be accepted as value datetime values. However this runs the risk of parsing ambiguous values incorrectly. To ensure reliable parsing it is best to use the canonical format specified above.
+  · wirksam_ab: A specific moment in time consisting of year, month, day, hour and minute (or `null`/`None`) The field value will be a string in the format `<YYYY>-<MM>-<DD>T<HH>:<MM>` (or `null`/`None`). For example: `2000-02-29T11:30`. For `POST`/`PUT`/`PATCH` requests the REST API uses a liberal parsing approach so that strings like `2026`, `February 29, 2000 12:34 MEST`, `letztes Jahr` etc. will be accepted as value datetime values. However this runs the risk of parsing ambiguous values incorrectly. To ensure reliable parsing it is best to use the canonical format specified above.
+  ◈ regelpruefung → choice (3 options, ChoiceGroup) · entscheidung → choice (3 options, ChoiceGroup) · entscheider → record (nutzer, EntitySelectStep) · vorschlag → record (ki_vorschlaege, EntitySelectStep) · angewendete_regel → record (regeln, EntitySelectStep)
+  ⚙ getFreigaben() · getFreigabenEntry(id) · createFreigabenEntry(fields) · updateFreigabenEntry(id, fields) · deleteFreigabenEntry(id) · queryFreigaben({ filter, orderby, limit, offset, fields }) · countFreigaben(filter?)
+  ✚ EnrichedFreigaben adds ONLY entscheiderName, vorschlagName, angewendete_regelName — via enrichFreigaben(freigaben, { nutzerMap, kiVorschlaegeMap, regelnMap }), all maps required
+  → entscheider links to app_id 6ad46a36c850c7898a0a8333
+  → vorschlag links to app_id 6ad46a41829d6f541fbb980c
+  → angewendete_regel links to app_id 6ad46a40bd412c2559d0d8ea
+- Tätigkeiten (taetigkeiten): vorhaben!^[applookup/select], beschreibung!^[string/textarea], ausfuehrender!^[applookup/select], zeitpunkt!^[date/datetimeminute] "Zeitpunkt der Ausführung", aenderungen[string/textarea], ergebnis[string/textarea], beobachtete_wirkung[string/textarea], freigabe^[applookup/select]
+  ≡ 3 records at build time
+  · zeitpunkt: A specific moment in time consisting of year, month, day, hour and minute (or `null`/`None`) The field value will be a string in the format `<YYYY>-<MM>-<DD>T<HH>:<MM>` (or `null`/`None`). For example: `2000-02-29T11:30`. For `POST`/`PUT`/`PATCH` requests the REST API uses a liberal parsing approach so that strings like `2026`, `February 29, 2000 12:34 MEST`, `letztes Jahr` etc. will be accepted as value datetime values. However this runs the risk of parsing ambiguous values incorrectly. To ensure reliable parsing it is best to use the canonical format specified above.
+  ◈ vorhaben → record (vorhaben, EntitySelectStep) · ausfuehrender → record (nutzer, EntitySelectStep) · freigabe → record (freigaben, EntitySelectStep)
+  ⚙ getTaetigkeiten() · getTaetigkeitenEntry(id) · createTaetigkeitenEntry(fields) · updateTaetigkeitenEntry(id, fields) · deleteTaetigkeitenEntry(id) · queryTaetigkeiten({ filter, orderby, limit, offset, fields }) · countTaetigkeiten(filter?)
+  ✚ EnrichedTaetigkeiten adds ONLY vorhabenName, ausfuehrenderName, freigabeName — via enrichTaetigkeiten(taetigkeiten, { vorhabenMap, nutzerMap, freigabenMap }), all maps required
+  → vorhaben links to app_id 6ad46a3f190edcba778818ee
+  → ausfuehrender links to app_id 6ad46a36c850c7898a0a8333
+  → freigabe links to app_id 6ad46a420ae6547b6f4f38ab
+- Erfahrungen (erfahrungen): taetigkeit^[applookup/select], titel!^[string/text], vorhaben^[applookup/select], beschreibung!^[string/textarea], kategorie^[lookup/select: prozess|technik|ki_einsatz|regeln_freigaben=Regeln und Freigaben|zusammenarbeit], wirkung[lookup/radio: positiv|neutral|negativ], wiederverwendbar[bool], erfasst_von![applookup/select]
+  ≡ 3 records at build time
+  ◈ kategorie → choice (5 options, ChoiceGroup) · wirkung → choice (3 options, ChoiceGroup) · taetigkeit → record (taetigkeiten, EntitySelectStep) · vorhaben → record (vorhaben, EntitySelectStep) · erfasst_von → record (nutzer, EntitySelectStep)
+  ⚙ getErfahrungen() · getErfahrungenEntry(id) · createErfahrungenEntry(fields) · updateErfahrungenEntry(id, fields) · deleteErfahrungenEntry(id) · queryErfahrungen({ filter, orderby, limit, offset, fields }) · countErfahrungen(filter?)
+  ✚ EnrichedErfahrungen adds ONLY taetigkeitName, vorhabenName, erfasst_vonName — via enrichErfahrungen(erfahrungen, { taetigkeitenMap, vorhabenMap, nutzerMap }), all maps required
+  → taetigkeit links to app_id 6ad46a425b823400977f1848
+  → vorhaben links to app_id 6ad46a3f190edcba778818ee
+  → erfasst_von links to app_id 6ad46a36c850c7898a0a8333

@@ -1,0 +1,77 @@
+{
+  "NutzerDialog.tsx": {
+    "vorname": "z. B. Anna",
+    "nachname": "z. B. Müller",
+    "email": "z. B. anna.mueller@firma.de"
+  },
+  "KiModelleDialog.tsx": {
+    "bezeichnung": "z. B. Support-Assistent",
+    "anbieter": "z. B. OpenAI, Anthropic",
+    "version": "z. B. 4.1",
+    "einsatzzweck": "Wofür wird das Modell genutzt?",
+    "faehigkeiten_einschraenkungen": "Stärken und bekannte Grenzen"
+  },
+  "VorhabenDialog.tsx": {
+    "titel": "z. B. Angebotsprüfung mit KI",
+    "ausgangssituation": "Was ist der aktuelle Stand?",
+    "ziel": "Was soll erreicht werden?",
+    "kontext": "Weitere Hintergründe oder Rahmenbedingungen",
+    "verantwortlicher": "Wer ist verantwortlich?",
+    "startdatum": "Wann startet das Vorhaben?",
+    "enddatum": "Wann soll es enden?"
+  },
+  "RegelnDialog.tsx": {
+    "bezeichnung": "z. B. Vier-Augen-Freigabe",
+    "beschreibung": "Was regelt diese Regel?",
+    "regeltyp": "z. B. Freigabe, Validierung",
+    "bedingung": "Wann greift die Regel?",
+    "wirkung": "Was passiert dann?",
+    "gueltig_ab": "Ab wann gilt die Regel?",
+    "verantwortlicher": "Wer ist verantwortlich?",
+    "vorgaengerregel": "Welche Regel wird abgelöst?"
+  },
+  "ArbeitskontexteDialog.tsx": {
+    "vorhaben": "Welches Vorhaben?",
+    "versionsnummer": "z. B. 1",
+    "aktueller_zustand": "Wie ist der aktuelle Stand?",
+    "verwendete_informationen": "Welche Informationen flossen ein?",
+    "annahmen": "Eine Annahme pro Zeile",
+    "erfasst_von": "Wer hat erfasst?",
+    "zeitpunkt": "Wann wurde erfasst?",
+    "vorgaengerkontext": "Welcher Kontext davor?"
+  },
+  "KiVorschlaegeDialog.tsx": {
+    "vorhaben": "Welches Vorhaben?",
+    "modell": "Welches KI-Modell?",
+    "art": "z. B. Hypothese, Code",
+    "inhalt": "Was schlägt die KI vor?",
+    "begruendung": "Warum dieser Vorschlag?",
+    "arbeitskontext": "Welcher Arbeitskontext?",
+    "betroffene_regel": "Welche Regel ist betroffen?"
+  },
+  "FreigabenDialog.tsx": {
+    "entscheider": "Wer entscheidet?",
+    "begruendung": "Warum so entschieden?",
+    "entscheidungszeitpunkt": "Wann wurde entschieden?",
+    "wirksam_ab": "Ab wann gilt es?",
+    "vorschlag": "Welcher Vorschlag?",
+    "angewendete_regel": "Welche Regel gilt?"
+  },
+  "TaetigkeitenDialog.tsx": {
+    "vorhaben": "Zu welchem Vorhaben?",
+    "beschreibung": "Was wurde gemacht?",
+    "ausfuehrender": "Wer hat es ausgeführt?",
+    "zeitpunkt": "Wann wurde es ausgeführt?",
+    "aenderungen": "Welche Änderungen wurden vorgenommen?",
+    "ergebnis": "Was kam dabei heraus?",
+    "beobachtete_wirkung": "Was wurde beobachtet?",
+    "freigabe": "Welche Freigabe?"
+  },
+  "ErfahrungenDialog.tsx": {
+    "taetigkeit": "Welche Tätigkeit?",
+    "titel": "z. B. Prompt-Review spart Zeit",
+    "vorhaben": "Welches Vorhaben?",
+    "beschreibung": "Was wurde erlebt oder gelernt?",
+    "erfasst_von": "Wer erfasst das?"
+  }
+}

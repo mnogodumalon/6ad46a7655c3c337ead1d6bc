@@ -1,0 +1,410 @@
+import { lookupLabel } from '@/i18n';
+
+// AUTOMATICALLY GENERATED TYPES - DO NOT EDIT
+
+export type LookupValue = { key: string; label: string };
+/** A raw record URL (applookup reference). NEVER render this directly
+ *  in JSX — it is a URL, not a display value. Show the enriched `*Name`
+ *  field or resolve it via the entity map instead. Assignable to/from
+ *  string everywhere; the `& {}` keeps the alias NAME visible in tsc
+ *  error messages (a plain primitive alias gets normalized away). */
+export type RecordUrl = string & {};
+export type GeoLocation = { lat: number; long: number; info?: string };
+
+export type AttachmentType = 'file' | 'note' | 'url' | 'json';
+export interface Attachment {
+  id: string;
+  type: AttachmentType;
+  label: string | null;
+  value: string | null;
+  active: boolean;
+  createdat?: string | null;
+  updatedat?: string | null;
+}
+
+export interface AttachmentInput {
+  type: AttachmentType;
+  label?: string;
+  value: string;
+  active?: boolean;
+}
+
+export interface Nutzer {
+  record_id: string;
+  /** The API field. */
+  created_at: string;
+  updated_at: string | null;
+  /** Alias of created_at, filled by the read helpers. The API sends
+   *  snake_case only — reading `createdat` off a raw record yields
+   *  undefined, which type-checks and then crashes at runtime. */
+  createdat: string;
+  updatedat: string | null;
+  fields: {
+    vorname?: string;
+    nachname?: string;
+    email?: string;
+    rolle?: LookupValue;
+    berechtigungsstufe?: LookupValue;
+    aktiv?: boolean;
+  };
+}
+
+export interface KiModelle {
+  record_id: string;
+  /** The API field. */
+  created_at: string;
+  updated_at: string | null;
+  /** Alias of created_at, filled by the read helpers. The API sends
+   *  snake_case only — reading `createdat` off a raw record yields
+   *  undefined, which type-checks and then crashes at runtime. */
+  createdat: string;
+  updatedat: string | null;
+  fields: {
+    bezeichnung?: string;
+    anbieter?: string;
+    version?: string;
+    einsatzzweck?: string;
+    faehigkeiten_einschraenkungen?: string;
+    zuverlaessigkeit?: LookupValue;
+    status?: LookupValue;
+  };
+}
+
+export interface Vorhaben {
+  record_id: string;
+  /** The API field. */
+  created_at: string;
+  updated_at: string | null;
+  /** Alias of created_at, filled by the read helpers. The API sends
+   *  snake_case only — reading `createdat` off a raw record yields
+   *  undefined, which type-checks and then crashes at runtime. */
+  createdat: string;
+  updatedat: string | null;
+  fields: {
+    titel?: string;
+    ausgangssituation?: string;
+    ziel?: string;
+    kontext?: string;
+    verantwortlicher?: RecordUrl; // applookup -> URL zu 'Nutzer' Record
+    status?: LookupValue;
+    startdatum?: string; // Format: YYYY-MM-DD oder ISO String
+    enddatum?: string; // Format: YYYY-MM-DD oder ISO String
+  };
+}
+
+export interface Regeln {
+  record_id: string;
+  /** The API field. */
+  created_at: string;
+  updated_at: string | null;
+  /** Alias of created_at, filled by the read helpers. The API sends
+   *  snake_case only — reading `createdat` off a raw record yields
+   *  undefined, which type-checks and then crashes at runtime. */
+  createdat: string;
+  updatedat: string | null;
+  fields: {
+    bezeichnung?: string;
+    beschreibung?: string;
+    regeltyp?: LookupValue;
+    bedingung?: string;
+    wirkung?: string;
+    erforderliche_stufe?: LookupValue;
+    gueltig_ab?: string; // Format: YYYY-MM-DD oder ISO String
+    status?: LookupValue;
+    verantwortlicher?: RecordUrl; // applookup -> URL zu 'Nutzer' Record
+    vorgaengerregel?: RecordUrl; // applookup -> URL zu 'Regeln' Record
+  };
+}
+
+export interface Arbeitskontexte {
+  record_id: string;
+  /** The API field. */
+  created_at: string;
+  updated_at: string | null;
+  /** Alias of created_at, filled by the read helpers. The API sends
+   *  snake_case only — reading `createdat` off a raw record yields
+   *  undefined, which type-checks and then crashes at runtime. */
+  createdat: string;
+  updatedat: string | null;
+  fields: {
+    vorhaben?: RecordUrl; // applookup -> URL zu 'Vorhaben' Record
+    versionsnummer?: number;
+    aktueller_zustand?: string;
+    verwendete_informationen?: string;
+    annahmen?: string;
+    gueltigkeitsstatus?: LookupValue;
+    erfasst_von?: RecordUrl; // applookup -> URL zu 'Nutzer' Record
+    zeitpunkt?: string; // Format: YYYY-MM-DD oder ISO String
+    vorgaengerkontext?: RecordUrl; // applookup -> URL zu 'Arbeitskontexte' Record
+  };
+}
+
+export interface KiVorschlaege {
+  record_id: string;
+  /** The API field. */
+  created_at: string;
+  updated_at: string | null;
+  /** Alias of created_at, filled by the read helpers. The API sends
+   *  snake_case only — reading `createdat` off a raw record yields
+   *  undefined, which type-checks and then crashes at runtime. */
+  createdat: string;
+  updatedat: string | null;
+  fields: {
+    vorhaben?: RecordUrl; // applookup -> URL zu 'Vorhaben' Record
+    modell?: RecordUrl; // applookup -> URL zu 'KiModelle' Record
+    art?: LookupValue;
+    inhalt?: string;
+    begruendung?: string;
+    status?: LookupValue;
+    arbeitskontext?: RecordUrl; // applookup -> URL zu 'Arbeitskontexte' Record
+    betroffene_regel?: RecordUrl; // applookup -> URL zu 'Regeln' Record
+  };
+}
+
+export interface Freigaben {
+  record_id: string;
+  /** The API field. */
+  created_at: string;
+  updated_at: string | null;
+  /** Alias of created_at, filled by the read helpers. The API sends
+   *  snake_case only — reading `createdat` off a raw record yields
+   *  undefined, which type-checks and then crashes at runtime. */
+  createdat: string;
+  updatedat: string | null;
+  fields: {
+    entscheider?: RecordUrl; // applookup -> URL zu 'Nutzer' Record
+    regelpruefung?: LookupValue;
+    entscheidung?: LookupValue;
+    begruendung?: string;
+    entscheidungszeitpunkt?: string; // Format: YYYY-MM-DD oder ISO String
+    wirksam_ab?: string; // Format: YYYY-MM-DD oder ISO String
+    vorschlag?: RecordUrl; // applookup -> URL zu 'KiVorschlaege' Record
+    angewendete_regel?: RecordUrl; // applookup -> URL zu 'Regeln' Record
+  };
+}
+
+export interface Taetigkeiten {
+  record_id: string;
+  /** The API field. */
+  created_at: string;
+  updated_at: string | null;
+  /** Alias of created_at, filled by the read helpers. The API sends
+   *  snake_case only — reading `createdat` off a raw record yields
+   *  undefined, which type-checks and then crashes at runtime. */
+  createdat: string;
+  updatedat: string | null;
+  fields: {
+    vorhaben?: RecordUrl; // applookup -> URL zu 'Vorhaben' Record
+    beschreibung?: string;
+    ausfuehrender?: RecordUrl; // applookup -> URL zu 'Nutzer' Record
+    zeitpunkt?: string; // Format: YYYY-MM-DD oder ISO String
+    aenderungen?: string;
+    ergebnis?: string;
+    beobachtete_wirkung?: string;
+    freigabe?: RecordUrl; // applookup -> URL zu 'Freigaben' Record
+  };
+}
+
+export interface Erfahrungen {
+  record_id: string;
+  /** The API field. */
+  created_at: string;
+  updated_at: string | null;
+  /** Alias of created_at, filled by the read helpers. The API sends
+   *  snake_case only — reading `createdat` off a raw record yields
+   *  undefined, which type-checks and then crashes at runtime. */
+  createdat: string;
+  updatedat: string | null;
+  fields: {
+    taetigkeit?: RecordUrl; // applookup -> URL zu 'Taetigkeiten' Record
+    titel?: string;
+    vorhaben?: RecordUrl; // applookup -> URL zu 'Vorhaben' Record
+    beschreibung?: string;
+    kategorie?: LookupValue;
+    wirkung?: LookupValue;
+    wiederverwendbar?: boolean;
+    erfasst_von?: RecordUrl; // applookup -> URL zu 'Nutzer' Record
+  };
+}
+
+export const APP_IDS = {
+  NUTZER: '6ad46a36c850c7898a0a8333',
+  KI_MODELLE: '6ad46a3d7361ef02a4331895',
+  VORHABEN: '6ad46a3f190edcba778818ee',
+  REGELN: '6ad46a40bd412c2559d0d8ea',
+  ARBEITSKONTEXTE: '6ad46a403c317a30877378d1',
+  KI_VORSCHLAEGE: '6ad46a41829d6f541fbb980c',
+  FREIGABEN: '6ad46a420ae6547b6f4f38ab',
+  TAETIGKEITEN: '6ad46a425b823400977f1848',
+  ERFAHRUNGEN: '6ad46a43c3c4102bbc5aaff2',
+} as const;
+
+
+export const LOOKUP_OPTIONS: Record<string, Record<string, {key: string, label: string}[]>> = {
+  'nutzer': {
+    rolle: [{ key: "administrator", get label() { return lookupLabel('nutzer', 'rolle', "administrator") ?? "Administrator"; } }, { key: "projektverantwortlicher", get label() { return lookupLabel('nutzer', 'rolle', "projektverantwortlicher") ?? "Projektverantwortlicher"; } }, { key: "bearbeiter", get label() { return lookupLabel('nutzer', 'rolle', "bearbeiter") ?? "Bearbeiter"; } }, { key: "entscheider", get label() { return lookupLabel('nutzer', 'rolle', "entscheider") ?? "Entscheider"; } }, { key: "ausfuehrender", get label() { return lookupLabel('nutzer', 'rolle', "ausfuehrender") ?? "Ausführender"; } }],
+    berechtigungsstufe: [{ key: "stufe_1", get label() { return lookupLabel('nutzer', 'berechtigungsstufe', "stufe_1") ?? "Stufe 1 – Lesen"; } }, { key: "stufe_2", get label() { return lookupLabel('nutzer', 'berechtigungsstufe', "stufe_2") ?? "Stufe 2 – Vorschlagen"; } }, { key: "stufe_3", get label() { return lookupLabel('nutzer', 'berechtigungsstufe', "stufe_3") ?? "Stufe 3 – Freigeben"; } }, { key: "stufe_4", get label() { return lookupLabel('nutzer', 'berechtigungsstufe', "stufe_4") ?? "Stufe 4 – Regeln ändern"; } }],
+  },
+  'ki_modelle': {
+    zuverlaessigkeit: [{ key: "niedrig", get label() { return lookupLabel('ki_modelle', 'zuverlaessigkeit', "niedrig") ?? "Niedrig"; } }, { key: "mittel", get label() { return lookupLabel('ki_modelle', 'zuverlaessigkeit', "mittel") ?? "Mittel"; } }, { key: "hoch", get label() { return lookupLabel('ki_modelle', 'zuverlaessigkeit', "hoch") ?? "Hoch"; } }],
+    status: [{ key: "in_erprobung", get label() { return lookupLabel('ki_modelle', 'status', "in_erprobung") ?? "In Erprobung"; } }, { key: "im_einsatz", get label() { return lookupLabel('ki_modelle', 'status', "im_einsatz") ?? "Im Einsatz"; } }, { key: "gesperrt", get label() { return lookupLabel('ki_modelle', 'status', "gesperrt") ?? "Gesperrt"; } }, { key: "abgeloest", get label() { return lookupLabel('ki_modelle', 'status', "abgeloest") ?? "Abgelöst"; } }],
+  },
+  'vorhaben': {
+    status: [{ key: "geplant", get label() { return lookupLabel('vorhaben', 'status', "geplant") ?? "Geplant"; } }, { key: "in_bearbeitung", get label() { return lookupLabel('vorhaben', 'status', "in_bearbeitung") ?? "In Bearbeitung"; } }, { key: "abgeschlossen", get label() { return lookupLabel('vorhaben', 'status', "abgeschlossen") ?? "Abgeschlossen"; } }, { key: "abgebrochen", get label() { return lookupLabel('vorhaben', 'status', "abgebrochen") ?? "Abgebrochen"; } }],
+  },
+  'regeln': {
+    regeltyp: [{ key: "datenmodell", get label() { return lookupLabel('regeln', 'regeltyp', "datenmodell") ?? "Datenmodell"; } }, { key: "zustandsuebergang", get label() { return lookupLabel('regeln', 'regeltyp', "zustandsuebergang") ?? "Zustandsübergang"; } }, { key: "geschaeftsregel", get label() { return lookupLabel('regeln', 'regeltyp', "geschaeftsregel") ?? "Geschäftsregel"; } }, { key: "berechtigung", get label() { return lookupLabel('regeln', 'regeltyp', "berechtigung") ?? "Berechtigung"; } }, { key: "freigabe", get label() { return lookupLabel('regeln', 'regeltyp', "freigabe") ?? "Freigabe"; } }, { key: "abhaengigkeit", get label() { return lookupLabel('regeln', 'regeltyp', "abhaengigkeit") ?? "Abhängigkeit"; } }, { key: "validierung", get label() { return lookupLabel('regeln', 'regeltyp', "validierung") ?? "Validierung"; } }, { key: "prozessbedingung", get label() { return lookupLabel('regeln', 'regeltyp', "prozessbedingung") ?? "Prozessbedingung"; } }],
+    erforderliche_stufe: [{ key: "stufe_1", get label() { return lookupLabel('regeln', 'erforderliche_stufe', "stufe_1") ?? "Stufe 1 – Lesen"; } }, { key: "stufe_2", get label() { return lookupLabel('regeln', 'erforderliche_stufe', "stufe_2") ?? "Stufe 2 – Vorschlagen"; } }, { key: "stufe_3", get label() { return lookupLabel('regeln', 'erforderliche_stufe', "stufe_3") ?? "Stufe 3 – Freigeben"; } }, { key: "stufe_4", get label() { return lookupLabel('regeln', 'erforderliche_stufe', "stufe_4") ?? "Stufe 4 – Regeln ändern"; } }],
+    status: [{ key: "entwurf", get label() { return lookupLabel('regeln', 'status', "entwurf") ?? "Entwurf"; } }, { key: "gueltig", get label() { return lookupLabel('regeln', 'status', "gueltig") ?? "Gültig"; } }, { key: "abgeloest", get label() { return lookupLabel('regeln', 'status', "abgeloest") ?? "Abgelöst"; } }, { key: "ausser_kraft", get label() { return lookupLabel('regeln', 'status', "ausser_kraft") ?? "Außer Kraft"; } }],
+  },
+  'arbeitskontexte': {
+    gueltigkeitsstatus: [{ key: "aktuell_gueltig", get label() { return lookupLabel('arbeitskontexte', 'gueltigkeitsstatus', "aktuell_gueltig") ?? "Aktuell gültig"; } }, { key: "ueberholt", get label() { return lookupLabel('arbeitskontexte', 'gueltigkeitsstatus', "ueberholt") ?? "Überholt"; } }],
+  },
+  'ki_vorschlaege': {
+    art: [{ key: "hypothese", get label() { return lookupLabel('ki_vorschlaege', 'art', "hypothese") ?? "Hypothese"; } }, { key: "loesungsvorschlag", get label() { return lookupLabel('ki_vorschlaege', 'art', "loesungsvorschlag") ?? "Lösungsvorschlag"; } }, { key: "text", get label() { return lookupLabel('ki_vorschlaege', 'art', "text") ?? "Text"; } }, { key: "code", get label() { return lookupLabel('ki_vorschlaege', 'art', "code") ?? "Code"; } }, { key: "mustererkennung", get label() { return lookupLabel('ki_vorschlaege', 'art', "mustererkennung") ?? "Mustererkennung"; } }, { key: "entscheidungsvorbereitung", get label() { return lookupLabel('ki_vorschlaege', 'art', "entscheidungsvorbereitung") ?? "Entscheidungsvorbereitung"; } }, { key: "fehlersuche", get label() { return lookupLabel('ki_vorschlaege', 'art', "fehlersuche") ?? "Fehlersuche"; } }, { key: "regelaenderung", get label() { return lookupLabel('ki_vorschlaege', 'art', "regelaenderung") ?? "Regeländerung"; } }],
+    status: [{ key: "vorgeschlagen", get label() { return lookupLabel('ki_vorschlaege', 'status', "vorgeschlagen") ?? "Vorgeschlagen"; } }, { key: "geprueft", get label() { return lookupLabel('ki_vorschlaege', 'status', "geprueft") ?? "Geprüft"; } }, { key: "abgelehnt", get label() { return lookupLabel('ki_vorschlaege', 'status', "abgelehnt") ?? "Abgelehnt"; } }, { key: "ausgefuehrt", get label() { return lookupLabel('ki_vorschlaege', 'status', "ausgefuehrt") ?? "Ausgeführt"; } }],
+  },
+  'freigaben': {
+    regelpruefung: [{ key: "erfuellt", get label() { return lookupLabel('freigaben', 'regelpruefung', "erfuellt") ?? "Regel erfüllt"; } }, { key: "nicht_erfuellt", get label() { return lookupLabel('freigaben', 'regelpruefung', "nicht_erfuellt") ?? "Regel nicht erfüllt"; } }, { key: "berechtigung_fehlt", get label() { return lookupLabel('freigaben', 'regelpruefung', "berechtigung_fehlt") ?? "Berechtigung fehlt"; } }],
+    entscheidung: [{ key: "freigegeben", get label() { return lookupLabel('freigaben', 'entscheidung', "freigegeben") ?? "Freigegeben"; } }, { key: "abgelehnt", get label() { return lookupLabel('freigaben', 'entscheidung', "abgelehnt") ?? "Abgelehnt"; } }, { key: "zurueckgestellt", get label() { return lookupLabel('freigaben', 'entscheidung', "zurueckgestellt") ?? "Zurückgestellt"; } }],
+  },
+  'erfahrungen': {
+    kategorie: [{ key: "prozess", get label() { return lookupLabel('erfahrungen', 'kategorie', "prozess") ?? "Prozess"; } }, { key: "technik", get label() { return lookupLabel('erfahrungen', 'kategorie', "technik") ?? "Technik"; } }, { key: "ki_einsatz", get label() { return lookupLabel('erfahrungen', 'kategorie', "ki_einsatz") ?? "KI-Einsatz"; } }, { key: "regeln_freigaben", get label() { return lookupLabel('erfahrungen', 'kategorie', "regeln_freigaben") ?? "Regeln und Freigaben"; } }, { key: "zusammenarbeit", get label() { return lookupLabel('erfahrungen', 'kategorie', "zusammenarbeit") ?? "Zusammenarbeit"; } }],
+    wirkung: [{ key: "positiv", get label() { return lookupLabel('erfahrungen', 'wirkung', "positiv") ?? "Positiv"; } }, { key: "neutral", get label() { return lookupLabel('erfahrungen', 'wirkung', "neutral") ?? "Neutral"; } }, { key: "negativ", get label() { return lookupLabel('erfahrungen', 'wirkung', "negativ") ?? "Negativ"; } }],
+  },
+};
+
+// Optimistic LookupValue writes: never re-type a label — resolve the schema
+// option instead (its label is a locale-aware getter; falls back to the key).
+// WRONG: status: { key: 'offen', label: 'Offen' }   (frozen in one language)
+// RIGHT: status: lookupOption('<appKey>', 'status', 'offen')
+export function lookupOption(app: string, field: string, key: string): LookupValue {
+  return LOOKUP_OPTIONS[app]?.[field]?.find(o => o.key === key) ?? { key, label: key };
+}
+
+export const FIELD_TYPES: Record<string, Record<string, string>> = {
+  'nutzer': {
+    'vorname': 'string/text',
+    'nachname': 'string/text',
+    'email': 'string/email',
+    'rolle': 'lookup/select',
+    'berechtigungsstufe': 'lookup/radio',
+    'aktiv': 'bool',
+  },
+  'ki_modelle': {
+    'bezeichnung': 'string/text',
+    'anbieter': 'string/text',
+    'version': 'string/text',
+    'einsatzzweck': 'string/textarea',
+    'faehigkeiten_einschraenkungen': 'string/textarea',
+    'zuverlaessigkeit': 'lookup/select',
+    'status': 'lookup/select',
+  },
+  'vorhaben': {
+    'titel': 'string/text',
+    'ausgangssituation': 'string/textarea',
+    'ziel': 'string/textarea',
+    'kontext': 'string/textarea',
+    'verantwortlicher': 'applookup/select',
+    'status': 'lookup/select',
+    'startdatum': 'date/date',
+    'enddatum': 'date/date',
+  },
+  'regeln': {
+    'bezeichnung': 'string/text',
+    'beschreibung': 'string/textarea',
+    'regeltyp': 'lookup/select',
+    'bedingung': 'string/textarea',
+    'wirkung': 'string/textarea',
+    'erforderliche_stufe': 'lookup/select',
+    'gueltig_ab': 'date/date',
+    'status': 'lookup/select',
+    'verantwortlicher': 'applookup/select',
+    'vorgaengerregel': 'applookup/select',
+  },
+  'arbeitskontexte': {
+    'vorhaben': 'applookup/select',
+    'versionsnummer': 'number',
+    'aktueller_zustand': 'string/textarea',
+    'verwendete_informationen': 'string/textarea',
+    'annahmen': 'string/textarea',
+    'gueltigkeitsstatus': 'lookup/radio',
+    'erfasst_von': 'applookup/select',
+    'zeitpunkt': 'date/datetimeminute',
+    'vorgaengerkontext': 'applookup/select',
+  },
+  'ki_vorschlaege': {
+    'vorhaben': 'applookup/select',
+    'modell': 'applookup/select',
+    'art': 'lookup/select',
+    'inhalt': 'string/textarea',
+    'begruendung': 'string/textarea',
+    'status': 'lookup/select',
+    'arbeitskontext': 'applookup/select',
+    'betroffene_regel': 'applookup/select',
+  },
+  'freigaben': {
+    'entscheider': 'applookup/select',
+    'regelpruefung': 'lookup/radio',
+    'entscheidung': 'lookup/radio',
+    'begruendung': 'string/textarea',
+    'entscheidungszeitpunkt': 'date/datetimeminute',
+    'wirksam_ab': 'date/datetimeminute',
+    'vorschlag': 'applookup/select',
+    'angewendete_regel': 'applookup/select',
+  },
+  'taetigkeiten': {
+    'vorhaben': 'applookup/select',
+    'beschreibung': 'string/textarea',
+    'ausfuehrender': 'applookup/select',
+    'zeitpunkt': 'date/datetimeminute',
+    'aenderungen': 'string/textarea',
+    'ergebnis': 'string/textarea',
+    'beobachtete_wirkung': 'string/textarea',
+    'freigabe': 'applookup/select',
+  },
+  'erfahrungen': {
+    'taetigkeit': 'applookup/select',
+    'titel': 'string/text',
+    'vorhaben': 'applookup/select',
+    'beschreibung': 'string/textarea',
+    'kategorie': 'lookup/select',
+    'wirkung': 'lookup/radio',
+    'wiederverwendbar': 'bool',
+    'erfasst_von': 'applookup/select',
+  },
+};
+
+export const HUB_TOPOLOGY: Record<string, { field: string; entity: string }[]> = {
+  'nutzer': [
+    { field: 'verantwortlicher', entity: 'vorhaben' },
+    { field: 'verantwortlicher', entity: 'regeln' },
+    { field: 'erfasst_von', entity: 'arbeitskontexte' },
+    { field: 'entscheider', entity: 'freigaben' },
+    { field: 'ausfuehrender', entity: 'taetigkeiten' },
+    { field: 'erfasst_von', entity: 'erfahrungen' },
+  ],
+  'vorhaben': [
+    { field: 'vorhaben', entity: 'arbeitskontexte' },
+    { field: 'vorhaben', entity: 'ki_vorschlaege' },
+    { field: 'vorhaben', entity: 'taetigkeiten' },
+    { field: 'vorhaben', entity: 'erfahrungen' },
+  ],
+};
+
+type StripLookup<T> = {
+  [K in keyof T]: T[K] extends LookupValue | undefined ? string | LookupValue | undefined
+    : T[K] extends LookupValue[] | undefined ? string[] | LookupValue[] | undefined
+    : T[K];
+};
+
+// Helper Types for creating new records (lookup fields as plain strings for API)
+export type CreateNutzer = StripLookup<Nutzer['fields']>;
+export type CreateKiModelle = StripLookup<KiModelle['fields']>;
+export type CreateVorhaben = StripLookup<Vorhaben['fields']>;
+export type CreateRegeln = StripLookup<Regeln['fields']>;
+export type CreateArbeitskontexte = StripLookup<Arbeitskontexte['fields']>;
+export type CreateKiVorschlaege = StripLookup<KiVorschlaege['fields']>;
+export type CreateFreigaben = StripLookup<Freigaben['fields']>;
+export type CreateTaetigkeiten = StripLookup<Taetigkeiten['fields']>;
+export type CreateErfahrungen = StripLookup<Erfahrungen['fields']>;

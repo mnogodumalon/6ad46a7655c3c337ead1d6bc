@@ -1,0 +1,39 @@
+{
+  "pages": {
+    "en": {
+      "Ablehnen": "Reject",
+      "Aktuell in Bearbeitung: {0}.": "Currently in progress: {0}.",
+      "Aktuelle Kontexte": "Current contexts",
+      "Als geprüft markieren": "Mark as reviewed",
+      "Anstehende Freigaben": "Upcoming approvals",
+      "Entscheiden": "Decide",
+      "Entwurf": "Draft",
+      "Erfahrung erfassen": "Record experience",
+      "Geprüft — noch nicht entschieden": "Reviewed — not yet decided",
+      "Gültige Regeln": "Valid rules",
+      "Keine Entwürfe — alle Regeln sind entschieden.": "No drafts — all rules are decided.",
+      "Keine offenen Vorschläge oder Freigaben — die Regeln gelten.": "No open suggestions or approvals — the rules apply.",
+      "Keine offenen Vorschläge.": "No open suggestions.",
+      "Modell gesperrt": "Model locked",
+      "Neues Vorhaben": "New project",
+      "Neueste Erfahrungen": "Latest experiences",
+      "Nichts wartet auf eine Entscheidung.": "Nothing is awaiting a decision.",
+      "Noch keine Erfahrungen festgehalten.": "No experiences recorded yet.",
+      "Noch {0} offene KI-Vorschläge — erst prüfen oder ablehnen.": "{0} open AI suggestions remaining — review or reject first.",
+      "Offene KI-Vorschläge": "Open AI suggestions",
+      "Offene Vorschläge": "Open suggestions",
+      "Regeln im Entwurf": "Draft rules",
+      "Vorgeschlagen": "Suggested",
+      "Vorschlag": "Suggestion",
+      "Vorschlag erfassen": "Add suggestion",
+      "ist gesperrt, hat aber noch offene Vorschläge:": "is locked but still has open suggestions:",
+      "{0} hat neue KI-Vorschläge zur Prüfung.": "{0} has new AI suggestions to review.",
+      "{0} verschoben": "{0} postponed",
+      "{0} wartet auf eine Freigabe.": "{0} is awaiting approval.",
+      "{0} — abgelehnt": "{0} — rejected",
+      "{0} — als geprüft markiert": "{0} — marked as reviewed",
+      "✓ Prüfen": "✓ Review"
+    }
+  },
+  "v": 1
+}

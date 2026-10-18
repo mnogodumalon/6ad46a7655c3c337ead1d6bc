@@ -1,0 +1,81 @@
+{
+  "entities": {
+    "Nutzer": {
+      "placeholders_set": 3,
+      "defaults_keys": [
+        "aktiv"
+      ],
+      "computed_keys": [],
+      "reason": "Reine Stammdaten ohne numerische Felder, daher keine Formeln; neue Nutzer sind standardmäßig aktiv."
+    },
+    "KI-Modelle": {
+      "placeholders_set": 5,
+      "defaults_keys": [
+        "status"
+      ],
+      "computed_keys": [],
+      "reason": "Reine Stammdaten ohne numerische Felder, daher keine Formeln."
+    },
+    "Vorhaben": {
+      "placeholders_set": 7,
+      "defaults_keys": [
+        "status",
+        "startdatum"
+      ],
+      "computed_keys": [
+        "_vorhaben_dauer_tage"
+      ],
+      "reason": "Start und Ende bilden ein Datumspaar, daher wird die Dauer in Tagen als virtuelles Feld für die Zusammenfassung berechnet."
+    },
+    "Regeln": {
+      "placeholders_set": 8,
+      "defaults_keys": [
+        "status",
+        "gueltig_ab"
+      ],
+      "computed_keys": [],
+      "reason": "Regeln sind reine Stammdaten ohne numerische Felder, daher keine Formeln."
+    },
+    "Arbeitskontexte": {
+      "placeholders_set": 8,
+      "defaults_keys": [
+        "zeitpunkt",
+        "gueltigkeitsstatus"
+      ],
+      "computed_keys": [
+        "versionsnummer"
+      ],
+      "reason": "Versionsnummer wird als Versionsnummer des Vorgängerkontexts plus 1 berechnet, sonst keine Kalkulation nötig."
+    },
+    "KI-Vorschläge": {
+      "placeholders_set": 7,
+      "defaults_keys": [
+        "status"
+      ],
+      "computed_keys": [],
+      "reason": "Keine Formeln, da der Dialog nur Stammdaten und Texte ohne Datumspaare, Mengen oder Preise enthält; die Versionsnummer ist kein Betrag."
+    },
+    "Freigaben": {
+      "placeholders_set": 6,
+      "defaults_keys": [
+        "entscheidungszeitpunkt"
+      ],
+      "computed_keys": [],
+      "reason": "Keine Formeln, da das Formular nur Entscheidungsdaten ohne numerische Felder enthält."
+    },
+    "Tätigkeiten": {
+      "placeholders_set": 8,
+      "defaults_keys": [
+        "zeitpunkt"
+      ],
+      "computed_keys": [],
+      "reason": "Keine Formeln, da die Tätigkeiten nur Stammdaten und Texte ohne numerische Felder enthalten."
+    },
+    "Erfahrungen": {
+      "placeholders_set": 5,
+      "defaults_keys": [],
+      "computed_keys": [],
+      "reason": "Keine Formeln, da es nur Stammdaten und Texte ohne numerische Felder gibt, und keine Defaults, da kein Startstatus oder Datum vorhanden ist."
+    }
+  }
+}

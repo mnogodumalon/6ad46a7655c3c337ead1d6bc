@@ -1,0 +1,423 @@
+{
+  "version": 1,
+  "language": "de",
+  "understanding": {
+    "summary": "Die Anwendung stellt KI im Unternehmen kontrolliert bereit. KI-Modelle machen Vorschläge (Ebene A). Explizite Regeln, Berechtigungen und Freigaben entscheiden, was wirksam wird (Ebene B). Arbeitskontexte, Tätigkeiten und Erfahrungen halten fest, was getan wurde und was daraus gelernt wurde (Ebene C).",
+    "roles": [
+      "Administrator",
+      "Projektverantwortlicher",
+      "Bearbeiter",
+      "Entscheider",
+      "Ausführender"
+    ],
+    "main_tasks": [
+      "Vorhaben anlegen und verfolgen",
+      "Arbeitskontext als gültigen Zustand pflegen",
+      "KI-Vorschläge erfassen und prüfen",
+      "Regeln pflegen und Regeländerungen freigeben",
+      "Freigaben entscheiden",
+      "Tätigkeiten und Wirkungen dokumentieren",
+      "Erfahrungen sammeln"
+    ],
+    "platform_roles": [
+      {
+        "persona": "Administrator",
+        "role": "administrator",
+        "apps": [
+          "nutzer",
+          "ki_modelle",
+          "vorhaben",
+          "regeln",
+          "arbeitskontexte",
+          "ki_vorschlaege",
+          "freigaben",
+          "taetigkeiten",
+          "erfahrungen"
+        ]
+      },
+      {
+        "persona": "Projektverantwortlicher",
+        "role": "datenverarbeitung",
+        "apps": [
+          "vorhaben",
+          "arbeitskontexte",
+          "ki_vorschlaege",
+          "taetigkeiten",
+          "erfahrungen",
+          "ki_modelle",
+          "regeln",
+          "freigaben"
+        ]
+      },
+      {
+        "persona": "Bearbeiter",
+        "role": "standard",
+        "apps": [
+          "vorhaben",
+          "arbeitskontexte",
+          "ki_vorschlaege",
+          "erfahrungen",
+          "ki_modelle",
+          "regeln",
+          "freigaben",
+          "taetigkeiten"
+        ]
+      },
+      {
+        "persona": "Entscheider",
+        "role": "datenverarbeitung",
+        "apps": [
+          "freigaben",
+          "ki_vorschlaege",
+          "regeln",
+          "vorhaben",
+          "arbeitskontexte",
+          "ki_modelle"
+        ]
+      },
+      {
+        "persona": "Ausführender",
+        "role": "standard",
+        "apps": [
+          "taetigkeiten",
+          "erfahrungen",
+          "freigaben",
+          "vorhaben",
+          "ki_vorschlaege",
+          "regeln",
+          "arbeitskontexte",
+          "ki_modelle"
+        ]
+      }
+    ]
+  },
+  "flows": [
+    {
+      "slug": "arbeitskontext-erfassen",
+      "label": {
+        "de": "Arbeitskontext erfassen",
+        "en": "Record work context"
+      },
+      "description": "Neuen gültigen Zustand eines Vorhabens festhalten und den bisherigen Kontext als überholt markieren.",
+      "priority": "must",
+      "writes": [
+        {
+          "entity": "arbeitskontexte",
+          "op": "create",
+          "when": "always",
+          "fields": {
+            "vorhaben": "picked",
+            "vorgaengerkontext": "picked",
+            "versionsnummer": "derived:computed:Versionsnummer des Vorgängerkontexts plus 1, beim ersten Kontext 1",
+            "aktueller_zustand": "user",
+            "verwendete_informationen": "user",
+            "annahmen": "user",
+            "gueltigkeitsstatus": "fixed:aktuell_gueltig",
+            "erfasst_von": "picked",
+            "zeitpunkt": "derived:now"
+          },
+          "needs": {
+            "versionsnummer": [
+              "vorhaben",
+              "vorgaengerkontext"
+            ]
+          }
+        },
+        {
+          "entity": "arbeitskontexte",
+          "op": "update",
+          "when": "optional",
+          "fields": {
+            "gueltigkeitsstatus": "fixed:ueberholt"
+          },
+          "needs": {}
+        }
+      ],
+      "required": [
+        "arbeitskontexte.vorgaengerkontext",
+        "arbeitskontexte.vorhaben"
+      ],
+      "brief": "# Flow `arbeitskontext-erfassen` — Arbeitskontext erfassen\nNeuen gültigen Zustand eines Vorhabens festhalten und den bisherigen Kontext als überholt markieren.\n\n## Your hook — import it, never rebuild what it owns\n`import { useArbeitskontextErfassenFlow } from '@/lib/journey/flows/ArbeitskontextErfassen';` — generated from the Schreibliste below. It OWNS the form(s), one record search per picked field (columns and filter from the plan) and the submit plan with every fixed and derived value. You compose: `flow.forms.<entity>` for <Bound>/<Field>, `{...flow.picks.<field>.select} {...flow.pick('<field>')}` (or `flow.pickMany` for a multi pick) for <EntitySelectStep>, `flow.validateStep(n)` in StepNav.onNext, `flow.submit` + `flow.formList` for SummaryStep/SuccessStep, `flow.reset()`; what the hook does not own reads through its door `flow.port` — availability `useOccupancy(flow.port, '<entity>', { resource })`, a count `useRecordCount(flow.port, …)` — never import servicePort next to the hook. Options: `steps` (field → step), `items` (how a hit reads, per pick: vorhaben, vorgaengerkontext, erfasst_von), `initial`, `messages`, and `compute` — REQUIRED, the plan leaves these rules to you: versionsnummer. The hook's docblock in .lane-context.md shows the exact call. This flow CHANGES a record of `arbeitskontexte`: `{...flow.picks.arbeitskontexte.select} {...flow.pick('arbeitskontexte')}` picks it, the hook prefills the form with its current values and updates THAT record — never a create step, never a list from useDashboardData. Never import servicePort, useStepForm, useJourneySubmit, useRecordSearch or useDashboardData in this page — check-intents refuses a page that uses the hook and any of them.\n\n## Steps (in this order)\n1. Vorhaben wählen\n2. Aktuell gültigen Vorgängerkontext anzeigen und übernehmen\n3. Zustand, Informationen und Annahmen eintragen\n4. Speichern\n\n## Schreibliste — the ONLY writes this flow makes (the gate compares your plan steps with this list)\n- creates `arbeitskontexte`:\n    - `vorhaben`: from the record the user picks in this flow — **REQUIRED in this flow** (mark it required and validate it before the step advances, whatever the app's base view says): intent `arbeitskontext-erfassen` → `versionsnummer` cannot be built without it\n    - `vorgaengerkontext`: from the record the user picks in this flow — **REQUIRED in this flow** (mark it required and validate it before the step advances, whatever the app's base view says): intent `arbeitskontext-erfassen` → `versionsnummer` cannot be built without it\n    - `versionsnummer`: derived (computed)\n    - `aktueller_zustand`: the user enters it (bind it through the layer: form.field/…)\n    - `verwendete_informationen`: the user enters it (bind it through the layer: form.field/…)\n    - `annahmen`: the user enters it (bind it through the layer: form.field/…)\n    - `gueltigkeitsstatus`: fixed value `aktuell_gueltig` — set it in the plan step's values, never ask\n    - `erfasst_von`: from the record the user picks in this flow\n    - `zeitpunkt`: derived: now() — set it in the plan step, never ask\n- updates `arbeitskontexte` (only when the flow needs it):\n    - `gueltigkeitsstatus`: fixed value `ueberholt` — set it in the plan step's values, never ask\n\n## Reads\n- `vorhaben` columns titel, status\n- `arbeitskontexte` columns versionsnummer, aktueller_zustand, zeitpunkt\n\n## Checks BEFORE the write (block the submit with the message when they fail)\n- unique (field=`arbeitskontexte.versionsnummer`) — message: „Diese Versionsnummer existiert für das Vorhaben bereits.“\n\n## Success page\n- shows: `arbeitskontexte.versionsnummer`, `arbeitskontexte.aktueller_zustand`\n- next flows to offer: `ki-vorschlag-erfassen`\n\n## Never write these — another flow or a tool owns them\n- `ki_vorschlaege.vorhaben` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.arbeitskontext` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.modell` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.art` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.inhalt` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.begruendung` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.betroffene_regel` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.status` (owner: intent `ki-vorschlag-erfassen`)\n- `freigaben.vorschlag` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.angewendete_regel` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.entscheider` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.regelpruefung` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.entscheidung` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.begruendung` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.entscheidungszeitpunkt` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.wirksam_ab` (owner: intent `vorschlag-entscheiden`)\n- `regeln.vorgaengerregel` (owner: intent `regel-aendern`)\n- `regeln.bezeichnung` (owner: intent `regel-aendern`)\n- `regeln.beschreibung` (owner: intent `regel-aendern`)\n- `regeln.bedingung` (owner: intent `regel-aendern`)\n- `regeln.wirkung` (owner: intent `regel-aendern`)\n- `regeln.erforderliche_stufe` (owner: intent `regel-aendern`)\n- `regeln.verantwortlicher` (owner: intent `regel-aendern`)\n- `regeln.status` (owner: intent `regel-aendern`)\n- `regeln.regeltyp` (owner: intent `regel-aendern`)\n- `taetigkeiten.vorhaben` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.freigabe` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.ausfuehrender` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.zeitpunkt` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.beschreibung` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.aenderungen` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.ergebnis` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.beobachtete_wirkung` (owner: intent `taetigkeit-dokumentieren`)\n- `erfahrungen.taetigkeit` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.erfasst_von` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.titel` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.beschreibung` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.kategorie` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.wirkung` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.wiederverwendbar` (owner: intent `erfahrung-festhalten`)\n- `regeln.gueltig_ab` (owner: tool `regel-wirksam-setzen`)\n"
+    },
+    {
+      "slug": "ki-vorschlag-erfassen",
+      "label": {
+        "de": "KI-Vorschlag erfassen",
+        "en": "Record AI proposal"
+      },
+      "description": "Vorschlag eines KI-Modells zu einem Vorhaben mit gültigem Arbeitskontext festhalten; er ist nur vorgeschlagen, nicht ausgeführt.",
+      "priority": "must",
+      "writes": [
+        {
+          "entity": "ki_vorschlaege",
+          "op": "create",
+          "when": "always",
+          "fields": {
+            "vorhaben": "picked",
+            "arbeitskontext": "picked",
+            "modell": "picked",
+            "art": "user",
+            "inhalt": "user",
+            "begruendung": "user",
+            "betroffene_regel": "picked",
+            "status": "fixed:vorgeschlagen"
+          },
+          "needs": {}
+        }
+      ],
+      "required": [],
+      "brief": "# Flow `ki-vorschlag-erfassen` — KI-Vorschlag erfassen\nVorschlag eines KI-Modells zu einem Vorhaben mit gültigem Arbeitskontext festhalten; er ist nur vorgeschlagen, nicht ausgeführt.\n\n## Your hook — import it, never rebuild what it owns\n`import { useKiVorschlagErfassenFlow } from '@/lib/journey/flows/KiVorschlagErfassen';` — generated from the Schreibliste below. It OWNS the form(s), one record search per picked field (columns and filter from the plan) and the submit plan with every fixed and derived value. You compose: `flow.forms.<entity>` for <Bound>/<Field>, `{...flow.picks.<field>.select} {...flow.pick('<field>')}` (or `flow.pickMany` for a multi pick) for <EntitySelectStep>, `flow.validateStep(n)` in StepNav.onNext, `flow.submit` + `flow.formList` for SummaryStep/SuccessStep, `flow.reset()`; what the hook does not own reads through its door `flow.port` — availability `useOccupancy(flow.port, '<entity>', { resource })`, a count `useRecordCount(flow.port, …)` — never import servicePort next to the hook. Options: `steps` (field → step), `items` (how a hit reads, per pick: vorhaben, arbeitskontext, modell, betroffene_regel), `initial`, `messages`. The hook's docblock in .lane-context.md shows the exact call. Never import servicePort, useStepForm, useJourneySubmit, useRecordSearch or useDashboardData in this page — check-intents refuses a page that uses the hook and any of them.\n\n## Steps (in this order)\n1. Vorhaben wählen\n2. Aktuell gültigen Arbeitskontext wählen\n3. Im Einsatz befindliches KI-Modell wählen\n4. Art, Inhalt und Begründung eintragen\n5. Optional betroffene Regel wählen\n\n## Schreibliste — the ONLY writes this flow makes (the gate compares your plan steps with this list)\n- creates `ki_vorschlaege`:\n    - `vorhaben`: from the record the user picks in this flow\n    - `arbeitskontext`: from the record the user picks in this flow\n    - `modell`: from the record the user picks in this flow\n    - `art`: the user enters it (bind it through the layer: form.field/…)\n    - `inhalt`: the user enters it (bind it through the layer: form.field/…)\n    - `begruendung`: the user enters it (bind it through the layer: form.field/…)\n    - `betroffene_regel`: from the record the user picks in this flow\n    - `status`: fixed value `vorgeschlagen` — set it in the plan step's values, never ask\n\n## Reads\n- `vorhaben` columns titel\n- `arbeitskontexte` columns versionsnummer, aktueller_zustand, vorhaben\n- `ki_modelle` columns bezeichnung, version, zuverlaessigkeit\n- `regeln` columns bezeichnung, regeltyp\n\n## Success page\n- shows: `ki_vorschlaege.inhalt`, `ki_vorschlaege.status`\n- next flows to offer: `vorschlag-entscheiden`\n\n## Never write these — another flow or a tool owns them\n- `arbeitskontexte.vorhaben` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.vorgaengerkontext` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.versionsnummer` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.aktueller_zustand` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.verwendete_informationen` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.annahmen` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.gueltigkeitsstatus` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.erfasst_von` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.zeitpunkt` (owner: intent `arbeitskontext-erfassen`)\n- `freigaben.vorschlag` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.angewendete_regel` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.entscheider` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.regelpruefung` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.entscheidung` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.begruendung` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.entscheidungszeitpunkt` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.wirksam_ab` (owner: intent `vorschlag-entscheiden`)\n- `regeln.vorgaengerregel` (owner: intent `regel-aendern`)\n- `regeln.bezeichnung` (owner: intent `regel-aendern`)\n- `regeln.beschreibung` (owner: intent `regel-aendern`)\n- `regeln.bedingung` (owner: intent `regel-aendern`)\n- `regeln.wirkung` (owner: intent `regel-aendern`)\n- `regeln.erforderliche_stufe` (owner: intent `regel-aendern`)\n- `regeln.verantwortlicher` (owner: intent `regel-aendern`)\n- `regeln.status` (owner: intent `regel-aendern`)\n- `regeln.regeltyp` (owner: intent `regel-aendern`)\n- `taetigkeiten.vorhaben` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.freigabe` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.ausfuehrender` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.zeitpunkt` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.beschreibung` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.aenderungen` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.ergebnis` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.beobachtete_wirkung` (owner: intent `taetigkeit-dokumentieren`)\n- `erfahrungen.taetigkeit` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.erfasst_von` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.titel` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.beschreibung` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.kategorie` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.wirkung` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.wiederverwendbar` (owner: intent `erfahrung-festhalten`)\n- `regeln.gueltig_ab` (owner: tool `regel-wirksam-setzen`)\n"
+    },
+    {
+      "slug": "vorschlag-entscheiden",
+      "label": {
+        "de": "Vorschlag entscheiden",
+        "en": "Decide on proposal"
+      },
+      "description": "Vorschlag anhand einer gültigen Regel prüfen, Freigabe festhalten und Vorschlagsstatus setzen.",
+      "priority": "must",
+      "writes": [
+        {
+          "entity": "freigaben",
+          "op": "create",
+          "when": "always",
+          "fields": {
+            "vorschlag": "picked",
+            "angewendete_regel": "picked",
+            "entscheider": "picked",
+            "regelpruefung": "user",
+            "entscheidung": "user",
+            "begruendung": "user",
+            "entscheidungszeitpunkt": "derived:now",
+            "wirksam_ab": "user"
+          },
+          "needs": {}
+        },
+        {
+          "entity": "ki_vorschlaege",
+          "op": "update",
+          "when": "always",
+          "fields": {
+            "status": "derived:computed:Bei Entscheidung freigegeben Status geprüft, bei abgelehnt Status abgelehnt, bei zurückgestellt unverändert"
+          },
+          "needs": {}
+        }
+      ],
+      "required": [],
+      "brief": "# Flow `vorschlag-entscheiden` — Vorschlag entscheiden\nVorschlag anhand einer gültigen Regel prüfen, Freigabe festhalten und Vorschlagsstatus setzen.\n\n## Your hook — import it, never rebuild what it owns\n`import { useVorschlagEntscheidenFlow } from '@/lib/journey/flows/VorschlagEntscheiden';` — generated from the Schreibliste below. It OWNS the form(s), one record search per picked field (columns and filter from the plan) and the submit plan with every fixed and derived value. You compose: `flow.forms.<entity>` for <Bound>/<Field>, `{...flow.picks.<field>.select} {...flow.pick('<field>')}` (or `flow.pickMany` for a multi pick) for <EntitySelectStep>, `flow.validateStep(n)` in StepNav.onNext, `flow.submit` + `flow.formList` for SummaryStep/SuccessStep, `flow.reset()`; what the hook does not own reads through its door `flow.port` — availability `useOccupancy(flow.port, '<entity>', { resource })`, a count `useRecordCount(flow.port, …)` — never import servicePort next to the hook. Options: `steps` (field → step), `items` (how a hit reads, per pick: vorschlag, angewendete_regel, entscheider), `initial`, `messages`, and `compute` — REQUIRED, the plan leaves these rules to you: status. The hook's docblock in .lane-context.md shows the exact call. This flow CHANGES a record of `ki_vorschlaege`: `{...flow.picks.ki_vorschlaege.select} {...flow.pick('ki_vorschlaege')}` picks it, the hook prefills the form with its current values and updates THAT record — never a create step, never a list from useDashboardData. Never import servicePort, useStepForm, useJourneySubmit, useRecordSearch or useDashboardData in this page — check-intents refuses a page that uses the hook and any of them.\n\n## Steps (in this order)\n1. Offenen Vorschlag wählen\n2. Gültige Regel wählen\n3. Regelprüfung festhalten\n4. Entscheidung und Begründung eintragen\n5. Wirksam-ab-Zeitpunkt optional setzen\n\n## Schreibliste — the ONLY writes this flow makes (the gate compares your plan steps with this list)\n- creates `freigaben`:\n    - `vorschlag`: from the record the user picks in this flow\n    - `angewendete_regel`: from the record the user picks in this flow\n    - `entscheider`: from the record the user picks in this flow\n    - `regelpruefung`: the user enters it (bind it through the layer: form.field/…)\n    - `entscheidung`: the user enters it (bind it through the layer: form.field/…)\n    - `begruendung`: the user enters it (bind it through the layer: form.field/…)\n    - `entscheidungszeitpunkt`: derived: now() — set it in the plan step, never ask\n    - `wirksam_ab`: the user enters it (bind it through the layer: form.field/…)\n- updates `ki_vorschlaege`:\n    - `status`: derived (computed)\n\n## Reads\n- `ki_vorschlaege` columns inhalt, art, modell, betroffene_regel\n- `regeln` columns bezeichnung, regeltyp, erforderliche_stufe\n\n## Success page\n- shows: `freigaben.entscheidung`, `ki_vorschlaege.status`\n- next flows to offer: `taetigkeit-dokumentieren`\n\n## Never write these — another flow or a tool owns them\n- `arbeitskontexte.vorhaben` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.vorgaengerkontext` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.versionsnummer` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.aktueller_zustand` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.verwendete_informationen` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.annahmen` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.gueltigkeitsstatus` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.erfasst_von` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.zeitpunkt` (owner: intent `arbeitskontext-erfassen`)\n- `ki_vorschlaege.vorhaben` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.arbeitskontext` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.modell` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.art` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.inhalt` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.begruendung` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.betroffene_regel` (owner: intent `ki-vorschlag-erfassen`)\n- `regeln.vorgaengerregel` (owner: intent `regel-aendern`)\n- `regeln.bezeichnung` (owner: intent `regel-aendern`)\n- `regeln.beschreibung` (owner: intent `regel-aendern`)\n- `regeln.bedingung` (owner: intent `regel-aendern`)\n- `regeln.wirkung` (owner: intent `regel-aendern`)\n- `regeln.erforderliche_stufe` (owner: intent `regel-aendern`)\n- `regeln.verantwortlicher` (owner: intent `regel-aendern`)\n- `regeln.status` (owner: intent `regel-aendern`)\n- `regeln.regeltyp` (owner: intent `regel-aendern`)\n- `taetigkeiten.vorhaben` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.freigabe` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.ausfuehrender` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.zeitpunkt` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.beschreibung` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.aenderungen` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.ergebnis` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.beobachtete_wirkung` (owner: intent `taetigkeit-dokumentieren`)\n- `erfahrungen.taetigkeit` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.erfasst_von` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.titel` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.beschreibung` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.kategorie` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.wirkung` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.wiederverwendbar` (owner: intent `erfahrung-festhalten`)\n- `regeln.gueltig_ab` (owner: tool `regel-wirksam-setzen`)\n"
+    },
+    {
+      "slug": "regel-aendern",
+      "label": {
+        "de": "Regel ändern",
+        "en": "Change rule"
+      },
+      "description": "Neue Fassung einer Regel als Entwurf anlegen, mit Verweis auf die Vorgängerregel; die Wirksamkeit entscheidet erst die Freigabe.",
+      "priority": "must",
+      "writes": [
+        {
+          "entity": "regeln",
+          "op": "create",
+          "when": "always",
+          "fields": {
+            "vorgaengerregel": "picked",
+            "bezeichnung": "user",
+            "beschreibung": "user",
+            "bedingung": "user",
+            "wirkung": "user",
+            "erforderliche_stufe": "user",
+            "verantwortlicher": "picked",
+            "status": "fixed:entwurf",
+            "regeltyp": "user"
+          },
+          "needs": {}
+        }
+      ],
+      "required": [],
+      "brief": "# Flow `regel-aendern` — Regel ändern\nNeue Fassung einer Regel als Entwurf anlegen, mit Verweis auf die Vorgängerregel; die Wirksamkeit entscheidet erst die Freigabe.\n\n## Your hook — import it, never rebuild what it owns\n`import { useRegelAendernFlow } from '@/lib/journey/flows/RegelAendern';` — generated from the Schreibliste below. It OWNS the form(s), one record search per picked field (columns and filter from the plan) and the submit plan with every fixed and derived value. You compose: `flow.forms.<entity>` for <Bound>/<Field>, `{...flow.picks.<field>.select} {...flow.pick('<field>')}` (or `flow.pickMany` for a multi pick) for <EntitySelectStep>, `flow.validateStep(n)` in StepNav.onNext, `flow.submit` + `flow.formList` for SummaryStep/SuccessStep, `flow.reset()`; what the hook does not own reads through its door `flow.port` — availability `useOccupancy(flow.port, '<entity>', { resource })`, a count `useRecordCount(flow.port, …)` — never import servicePort next to the hook. Options: `steps` (field → step), `items` (how a hit reads, per pick: vorgaengerregel, verantwortlicher), `initial`, `messages`. The hook's docblock in .lane-context.md shows the exact call. Never import servicePort, useStepForm, useJourneySubmit, useRecordSearch or useDashboardData in this page — check-intents refuses a page that uses the hook and any of them.\n\n## Steps (in this order)\n1. Bestehende Regel wählen\n2. Bedingung, Wirkung und Stufe anpassen\n3. Als Entwurf speichern\n\n## Schreibliste — the ONLY writes this flow makes (the gate compares your plan steps with this list)\n- creates `regeln`:\n    - `vorgaengerregel`: from the record the user picks in this flow\n    - `bezeichnung`: the user enters it (bind it through the layer: form.field/…)\n    - `beschreibung`: the user enters it (bind it through the layer: form.field/…)\n    - `bedingung`: the user enters it (bind it through the layer: form.field/…)\n    - `wirkung`: the user enters it (bind it through the layer: form.field/…)\n    - `erforderliche_stufe`: the user enters it (bind it through the layer: form.field/…)\n    - `verantwortlicher`: from the record the user picks in this flow\n    - `status`: fixed value `entwurf` — set it in the plan step's values, never ask\n    - `regeltyp`: the user enters it (bind it through the layer: form.field/…)\n\n## Reads\n- `regeln` columns bezeichnung, regeltyp, bedingung, wirkung, erforderliche_stufe\n\n## Success page\n- shows: `regeln.bezeichnung`, `regeln.status`\n- next flows to offer: `ki-vorschlag-erfassen`\n\n## Never write these — another flow or a tool owns them\n- `arbeitskontexte.vorhaben` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.vorgaengerkontext` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.versionsnummer` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.aktueller_zustand` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.verwendete_informationen` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.annahmen` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.gueltigkeitsstatus` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.erfasst_von` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.zeitpunkt` (owner: intent `arbeitskontext-erfassen`)\n- `ki_vorschlaege.vorhaben` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.arbeitskontext` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.modell` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.art` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.inhalt` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.begruendung` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.betroffene_regel` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.status` (owner: intent `ki-vorschlag-erfassen`)\n- `freigaben.vorschlag` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.angewendete_regel` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.entscheider` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.regelpruefung` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.entscheidung` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.begruendung` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.entscheidungszeitpunkt` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.wirksam_ab` (owner: intent `vorschlag-entscheiden`)\n- `taetigkeiten.vorhaben` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.freigabe` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.ausfuehrender` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.zeitpunkt` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.beschreibung` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.aenderungen` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.ergebnis` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.beobachtete_wirkung` (owner: intent `taetigkeit-dokumentieren`)\n- `erfahrungen.taetigkeit` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.erfasst_von` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.titel` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.beschreibung` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.kategorie` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.wirkung` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.wiederverwendbar` (owner: intent `erfahrung-festhalten`)\n- `regeln.gueltig_ab` (owner: tool `regel-wirksam-setzen`)\n"
+    },
+    {
+      "slug": "taetigkeit-dokumentieren",
+      "label": {
+        "de": "Tätigkeit dokumentieren",
+        "en": "Document activity"
+      },
+      "description": "Ausgeführte Tätigkeit zu einem Vorhaben und einer erteilten Freigabe mit Ergebnis und Wirkung festhalten und den Vorschlag als ausgeführt markieren.",
+      "priority": "must",
+      "writes": [
+        {
+          "entity": "taetigkeiten",
+          "op": "create",
+          "when": "always",
+          "fields": {
+            "vorhaben": "picked",
+            "freigabe": "picked",
+            "ausfuehrender": "picked",
+            "zeitpunkt": "derived:now",
+            "beschreibung": "user",
+            "aenderungen": "user",
+            "ergebnis": "user",
+            "beobachtete_wirkung": "user"
+          },
+          "needs": {}
+        },
+        {
+          "entity": "ki_vorschlaege",
+          "op": "update",
+          "when": "optional",
+          "fields": {
+            "status": "fixed:ausgefuehrt"
+          },
+          "needs": {}
+        }
+      ],
+      "required": [],
+      "brief": "# Flow `taetigkeit-dokumentieren` — Tätigkeit dokumentieren\nAusgeführte Tätigkeit zu einem Vorhaben und einer erteilten Freigabe mit Ergebnis und Wirkung festhalten und den Vorschlag als ausgeführt markieren.\n\n## Your hook — import it, never rebuild what it owns\n`import { useTaetigkeitDokumentierenFlow } from '@/lib/journey/flows/TaetigkeitDokumentieren';` — generated from the Schreibliste below. It OWNS the form(s), one record search per picked field (columns and filter from the plan) and the submit plan with every fixed and derived value. You compose: `flow.forms.<entity>` for <Bound>/<Field>, `{...flow.picks.<field>.select} {...flow.pick('<field>')}` (or `flow.pickMany` for a multi pick) for <EntitySelectStep>, `flow.validateStep(n)` in StepNav.onNext, `flow.submit` + `flow.formList` for SummaryStep/SuccessStep, `flow.reset()`; what the hook does not own reads through its door `flow.port` — availability `useOccupancy(flow.port, '<entity>', { resource })`, a count `useRecordCount(flow.port, …)` — never import servicePort next to the hook. Options: `steps` (field → step), `items` (how a hit reads, per pick: vorhaben, freigabe, ausfuehrender), `initial`, `messages`. The hook's docblock in .lane-context.md shows the exact call. This flow CHANGES a record of `ki_vorschlaege`: `{...flow.picks.ki_vorschlaege.select} {...flow.pick('ki_vorschlaege')}` picks it, the hook prefills the form with its current values and updates THAT record — never a create step, never a list from useDashboardData. Never import servicePort, useStepForm, useJourneySubmit, useRecordSearch or useDashboardData in this page — check-intents refuses a page that uses the hook and any of them.\n\n## Steps (in this order)\n1. Vorhaben wählen\n2. Erteilte Freigabe wählen\n3. Beschreibung, Änderungen, Ergebnis und Wirkung eintragen\n4. Speichern\n\n## Schreibliste — the ONLY writes this flow makes (the gate compares your plan steps with this list)\n- creates `taetigkeiten`:\n    - `vorhaben`: from the record the user picks in this flow\n    - `freigabe`: from the record the user picks in this flow\n    - `ausfuehrender`: from the record the user picks in this flow\n    - `zeitpunkt`: derived: now() — set it in the plan step, never ask\n    - `beschreibung`: the user enters it (bind it through the layer: form.field/…)\n    - `aenderungen`: the user enters it (bind it through the layer: form.field/…)\n    - `ergebnis`: the user enters it (bind it through the layer: form.field/…)\n    - `beobachtete_wirkung`: the user enters it (bind it through the layer: form.field/…)\n- updates `ki_vorschlaege` (only when the flow needs it):\n    - `status`: fixed value `ausgefuehrt` — set it in the plan step's values, never ask\n\n## Reads\n- `freigaben` columns vorschlag, angewendete_regel, entscheidungszeitpunkt, wirksam_ab\n- `vorhaben` columns titel\n\n## Success page\n- shows: `taetigkeiten.beschreibung`, `taetigkeiten.ergebnis`\n- next flows to offer: `erfahrung-festhalten`\n\n## Never write these — another flow or a tool owns them\n- `arbeitskontexte.vorhaben` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.vorgaengerkontext` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.versionsnummer` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.aktueller_zustand` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.verwendete_informationen` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.annahmen` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.gueltigkeitsstatus` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.erfasst_von` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.zeitpunkt` (owner: intent `arbeitskontext-erfassen`)\n- `ki_vorschlaege.vorhaben` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.arbeitskontext` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.modell` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.art` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.inhalt` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.begruendung` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.betroffene_regel` (owner: intent `ki-vorschlag-erfassen`)\n- `freigaben.vorschlag` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.angewendete_regel` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.entscheider` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.regelpruefung` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.entscheidung` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.begruendung` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.entscheidungszeitpunkt` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.wirksam_ab` (owner: intent `vorschlag-entscheiden`)\n- `regeln.vorgaengerregel` (owner: intent `regel-aendern`)\n- `regeln.bezeichnung` (owner: intent `regel-aendern`)\n- `regeln.beschreibung` (owner: intent `regel-aendern`)\n- `regeln.bedingung` (owner: intent `regel-aendern`)\n- `regeln.wirkung` (owner: intent `regel-aendern`)\n- `regeln.erforderliche_stufe` (owner: intent `regel-aendern`)\n- `regeln.verantwortlicher` (owner: intent `regel-aendern`)\n- `regeln.status` (owner: intent `regel-aendern`)\n- `regeln.regeltyp` (owner: intent `regel-aendern`)\n- `erfahrungen.taetigkeit` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.erfasst_von` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.titel` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.beschreibung` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.kategorie` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.wirkung` (owner: intent `erfahrung-festhalten`)\n- `erfahrungen.wiederverwendbar` (owner: intent `erfahrung-festhalten`)\n- `regeln.gueltig_ab` (owner: tool `regel-wirksam-setzen`)\n"
+    },
+    {
+      "slug": "erfahrung-festhalten",
+      "label": {
+        "de": "Erfahrung festhalten",
+        "en": "Capture experience"
+      },
+      "description": "Aus einer Tätigkeit gewonnene Erfahrung mit Bezug zu Tätigkeit und Vorhaben erfassen.",
+      "priority": "nice",
+      "writes": [
+        {
+          "entity": "erfahrungen",
+          "op": "create",
+          "when": "always",
+          "fields": {
+            "taetigkeit": "picked",
+            "erfasst_von": "picked",
+            "titel": "user",
+            "beschreibung": "user",
+            "kategorie": "user",
+            "wirkung": "user",
+            "wiederverwendbar": "user"
+          },
+          "needs": {}
+        }
+      ],
+      "required": [],
+      "brief": "# Flow `erfahrung-festhalten` — Erfahrung festhalten\nAus einer Tätigkeit gewonnene Erfahrung mit Bezug zu Tätigkeit und Vorhaben erfassen.\n\n## Your hook — import it, never rebuild what it owns\n`import { useErfahrungFesthaltenFlow } from '@/lib/journey/flows/ErfahrungFesthalten';` — generated from the Schreibliste below. It OWNS the form(s), one record search per picked field (columns and filter from the plan) and the submit plan with every fixed and derived value. You compose: `flow.forms.<entity>` for <Bound>/<Field>, `{...flow.picks.<field>.select} {...flow.pick('<field>')}` (or `flow.pickMany` for a multi pick) for <EntitySelectStep>, `flow.validateStep(n)` in StepNav.onNext, `flow.submit` + `flow.formList` for SummaryStep/SuccessStep, `flow.reset()`; what the hook does not own reads through its door `flow.port` — availability `useOccupancy(flow.port, '<entity>', { resource })`, a count `useRecordCount(flow.port, …)` — never import servicePort next to the hook. Options: `steps` (field → step), `items` (how a hit reads, per pick: taetigkeit, erfasst_von), `initial`, `messages`. The hook's docblock in .lane-context.md shows the exact call. Never import servicePort, useStepForm, useJourneySubmit, useRecordSearch or useDashboardData in this page — check-intents refuses a page that uses the hook and any of them.\n\n## Steps (in this order)\n1. Tätigkeit wählen\n2. Titel, Beschreibung, Kategorie und Wirkung eintragen\n3. Wiederverwendbarkeit markieren\n\n## Schreibliste — the ONLY writes this flow makes (the gate compares your plan steps with this list)\n- creates `erfahrungen`:\n    - `taetigkeit`: from the record the user picks in this flow\n    - `erfasst_von`: from the record the user picks in this flow\n    - `titel`: the user enters it (bind it through the layer: form.field/…)\n    - `beschreibung`: the user enters it (bind it through the layer: form.field/…)\n    - `kategorie`: the user enters it (bind it through the layer: form.field/…)\n    - `wirkung`: the user enters it (bind it through the layer: form.field/…)\n    - `wiederverwendbar`: the user enters it (bind it through the layer: form.field/…)\n\n## Reads\n- `taetigkeiten` columns beschreibung, ergebnis, beobachtete_wirkung, vorhaben\n\n## Success page\n- shows: `erfahrungen.titel`, `erfahrungen.kategorie`\n\n## Never write these — another flow or a tool owns them\n- `arbeitskontexte.vorhaben` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.vorgaengerkontext` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.versionsnummer` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.aktueller_zustand` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.verwendete_informationen` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.annahmen` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.gueltigkeitsstatus` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.erfasst_von` (owner: intent `arbeitskontext-erfassen`)\n- `arbeitskontexte.zeitpunkt` (owner: intent `arbeitskontext-erfassen`)\n- `ki_vorschlaege.vorhaben` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.arbeitskontext` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.modell` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.art` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.inhalt` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.begruendung` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.betroffene_regel` (owner: intent `ki-vorschlag-erfassen`)\n- `ki_vorschlaege.status` (owner: intent `ki-vorschlag-erfassen`)\n- `freigaben.vorschlag` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.angewendete_regel` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.entscheider` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.regelpruefung` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.entscheidung` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.begruendung` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.entscheidungszeitpunkt` (owner: intent `vorschlag-entscheiden`)\n- `freigaben.wirksam_ab` (owner: intent `vorschlag-entscheiden`)\n- `regeln.vorgaengerregel` (owner: intent `regel-aendern`)\n- `regeln.bezeichnung` (owner: intent `regel-aendern`)\n- `regeln.beschreibung` (owner: intent `regel-aendern`)\n- `regeln.bedingung` (owner: intent `regel-aendern`)\n- `regeln.wirkung` (owner: intent `regel-aendern`)\n- `regeln.erforderliche_stufe` (owner: intent `regel-aendern`)\n- `regeln.verantwortlicher` (owner: intent `regel-aendern`)\n- `regeln.status` (owner: intent `regel-aendern`)\n- `regeln.regeltyp` (owner: intent `regel-aendern`)\n- `taetigkeiten.vorhaben` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.freigabe` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.ausfuehrender` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.zeitpunkt` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.beschreibung` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.aenderungen` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.ergebnis` (owner: intent `taetigkeit-dokumentieren`)\n- `taetigkeiten.beobachtete_wirkung` (owner: intent `taetigkeit-dokumentieren`)\n- `regeln.gueltig_ab` (owner: tool `regel-wirksam-setzen`)\n"
+    }
+  ],
+  "public_pages": [],
+  "tools": [
+    {
+      "id": "regel-wirksam-setzen",
+      "purpose": "Bei neuer Freigabe (Trigger: Anlage einer Freigabe) prüft das Werkzeug, ob die Entscheidung freigegeben ist und der Vorschlag eine betroffene Regel hat. Nur dann wird die Regel gültig, und die Vorgängerregel wird abgelöst."
+    },
+    {
+      "id": "offene-vorschlaege-melden",
+      "purpose": "Sendet an den Schlüsselinhaber eine Sammelmail über alle KI-Vorschläge im Status vorgeschlagen. Eine Mail pro Lauf, keine Datensätze werden geändert."
+    }
+  ],
+  "covered_by_platform": [
+    {
+      "wish": "Nutzer, Vorhaben, Erfahrungen, Regeln und alle Elemente verwalten",
+      "feature": "record_form"
+    },
+    {
+      "wish": "Übersicht und Suche über alle Elemente",
+      "feature": "list_page"
+    },
+    {
+      "wish": "Nachvollziehbarkeit: wer hat was wann geändert",
+      "feature": "record_history"
+    },
+    {
+      "wish": "Berechtigungen für Nutzergruppen",
+      "feature": "user_roles"
+    },
+    {
+      "wish": "Dokumente und Notizen an Vorhaben und Regeln",
+      "feature": "record_attachments"
+    },
+    {
+      "wish": "Auswertung der Vorschläge je Status oder Modell",
+      "feature": "distribution_view"
+    }
+  ],
+  "ownership": {
+    "arbeitskontexte": {
+      "vorhaben": "intent:arbeitskontext-erfassen",
+      "vorgaengerkontext": "intent:arbeitskontext-erfassen",
+      "versionsnummer": "intent:arbeitskontext-erfassen",
+      "aktueller_zustand": "intent:arbeitskontext-erfassen",
+      "verwendete_informationen": "intent:arbeitskontext-erfassen",
+      "annahmen": "intent:arbeitskontext-erfassen",
+      "gueltigkeitsstatus": "intent:arbeitskontext-erfassen",
+      "erfasst_von": "intent:arbeitskontext-erfassen",
+      "zeitpunkt": "intent:arbeitskontext-erfassen"
+    },
+    "ki_vorschlaege": {
+      "vorhaben": "intent:ki-vorschlag-erfassen",
+      "arbeitskontext": "intent:ki-vorschlag-erfassen",
+      "modell": "intent:ki-vorschlag-erfassen",
+      "art": "intent:ki-vorschlag-erfassen",
+      "inhalt": "intent:ki-vorschlag-erfassen",
+      "begruendung": "intent:ki-vorschlag-erfassen",
+      "betroffene_regel": "intent:ki-vorschlag-erfassen",
+      "status": "intent:taetigkeit-dokumentieren"
+    },
+    "freigaben": {
+      "vorschlag": "intent:vorschlag-entscheiden",
+      "angewendete_regel": "intent:vorschlag-entscheiden",
+      "entscheider": "intent:vorschlag-entscheiden",
+      "regelpruefung": "intent:vorschlag-entscheiden",
+      "entscheidung": "intent:vorschlag-entscheiden",
+      "begruendung": "intent:vorschlag-entscheiden",
+      "entscheidungszeitpunkt": "intent:vorschlag-entscheiden",
+      "wirksam_ab": "intent:vorschlag-entscheiden"
+    },
+    "regeln": {
+      "vorgaengerregel": "intent:regel-aendern",
+      "bezeichnung": "intent:regel-aendern",
+      "beschreibung": "intent:regel-aendern",
+      "bedingung": "intent:regel-aendern",
+      "wirkung": "intent:regel-aendern",
+      "erforderliche_stufe": "intent:regel-aendern",
+      "verantwortlicher": "intent:regel-aendern",
+      "status": "tool:regel-wirksam-setzen",
+      "regeltyp": "intent:regel-aendern",
+      "gueltig_ab": "tool:regel-wirksam-setzen"
+    },
+    "taetigkeiten": {
+      "vorhaben": "intent:taetigkeit-dokumentieren",
+      "freigabe": "intent:taetigkeit-dokumentieren",
+      "ausfuehrender": "intent:taetigkeit-dokumentieren",
+      "zeitpunkt": "intent:taetigkeit-dokumentieren",
+      "beschreibung": "intent:taetigkeit-dokumentieren",
+      "aenderungen": "intent:taetigkeit-dokumentieren",
+      "ergebnis": "intent:taetigkeit-dokumentieren",
+      "beobachtete_wirkung": "intent:taetigkeit-dokumentieren"
+    },
+    "erfahrungen": {
+      "taetigkeit": "intent:erfahrung-festhalten",
+      "erfasst_von": "intent:erfahrung-festhalten",
+      "titel": "intent:erfahrung-festhalten",
+      "beschreibung": "intent:erfahrung-festhalten",
+      "kategorie": "intent:erfahrung-festhalten",
+      "wirkung": "intent:erfahrung-festhalten",
+      "wiederverwendbar": "intent:erfahrung-festhalten"
+    }
+  },
+  "dashboard": {
+    "focus": [
+      "Offene KI-Vorschläge (Status vorgeschlagen)",
+      "Anstehende Freigaben",
+      "Vorhaben in Bearbeitung",
+      "Gültige Regeln und Entwürfe",
+      "Aktuell gültige Arbeitskontexte",
+      "Neueste Erfahrungen"
+    ],
+    "hints": [
+      "Vorschläge und Freigaben klar trennen: Vorschlag ist nicht Ausführung",
+      "Regeln im Entwurf hervorheben",
+      "KI-Modelle mit Status gesperrt sichtbar markieren"
+    ],
+    "wishes": []
+  }
+}

@@ -1,0 +1,71 @@
+Erstelle eine Anwendung, mit der ein Unternejmrn KI kontrolliert zur Verfügung stellen kann.
+
+Die Anwendung muss drei technische Ebenen unterscheiden. 
+
+Die grobe Spezifikation der gewünschten Funktionalitäten lautet:
+
+Ebene A: KI für Analyse und Problemlösung
+
+Diese Ebene umfasst:
+
+* Interpretation von Informationen,
+* Erzeugung von Hypothesen,
+* Entwicklung von Lösungsvorschlägen,
+* Erstellung von Texten und Code,
+* Erkennung von Mustern,
+* Vorbereitung von Entscheidungen,
+* Unterstützung bei der Fehlersuche.
+
+Die eingesetzten Modelle können sich weiterentwickeln.
+
+Ihre Fähigkeiten und Zuverlässigkeit können variieren.
+
+Deshalb darf die gesamte Kontrolle über das Geschäftssystem nicht von einem einzelnen Modell abhängen.
+
+Ebene B: Explizite Arbeits- und Geschäftslogik
+
+Diese Ebene umfasst:
+
+* Datenmodelle,
+* Zustände und Zustandsübergänge,
+* Geschäftsregeln,
+* Berechtigungen,
+* Freigaben,
+* Abhängigkeiten,
+* Validierungen,
+* verbindliche Prozessbedingungen.
+
+Diese Regeln müssen explizit, überprüfbar und unabhängig vom jeweiligen Modell ausführbar sein.
+
+Ein Sprachmodell darf beispielsweise eine technische Anforderung interpretieren und eine Regeländerung vorschlagen.
+
+Ob die Regeländerung gültig ist, welche Berechtigung dafür erforderlich ist und ob sie wirksam wird, muss jedoch durch kontrollierbare Mechanismen entschieden werden.
+
+Das entspricht unserer bisherigen Architekturentscheidung: Die deterministische LivingApps-Kernlogik bleibt von der probabilistischen Arbeitsweise eines Sprachmodells getrennt.
+
+Diese Trennung ist keine Behauptung, dass deterministische Software grundsätzlich fehlerfrei wäre.
+
+Sie schafft vielmehr eine überprüfbare Grenze zwischen einer vorgeschlagenen Handlung und einer tatsächlich ausgeführten Handlung.
+
+Ebene C: Nachvollziehbarkeit und Erfahrung
+
+Diese Ebene verbindet die Arbeit mit ihrer Historie.
+
+Sie hält unter anderem fest:
+
+* Ausgangssituation,
+* Ziel und Kontext,
+* verwendete Informationen,
+* Annahmen,
+* relevante Entscheidungen,
+* ausgeführte Tätigkeiten,
+* Änderungen,
+* Ergebnisse,
+* beobachtete Wirkungen,
+* gewonnene Erfahrungen.
+
+Diese Ebene darf nicht auf ein Gesprächsprotokoll reduziert werden.
+
+Ein Chat enthält Äußerungen. Ein Arbeitskontext muss zusätzlich den jeweils gültigen Zustand und seine Beziehungen zu früheren Zuständen abbilden.
+
+Die Anwendung muss auch alle fundamentalen Elemente verwalten: Nutzer, Vorhaben, Erfahrungen, Regeln, …
