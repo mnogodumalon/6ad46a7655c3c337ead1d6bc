@@ -20,6 +20,7 @@
 import type { ComponentType } from 'react';
 
 // <custom:intent-imports>
+import { IconFileDescription, IconBulb, IconGavel, IconRuler2, IconClipboardCheck, IconSchool } from '@tabler/icons-react';
 // </custom:intent-imports>
 
 export interface IntentLink {
@@ -42,6 +43,12 @@ export interface IntentLink {
 
 export const INTENTS: IntentLink[] = [
   // <custom:intents>
+  { path: '/intents/arbeitskontext-erfassen', label: { de: 'Arbeitskontext erfassen', en: 'Record work context' }, icon: IconFileDescription, description: 'Neuen gültigen Zustand eines Vorhabens festhalten und den bisherigen Kontext als überholt markieren.' },
+  { path: '/intents/ki-vorschlag-erfassen', label: { de: 'KI-Vorschlag erfassen', en: 'Record AI proposal' }, icon: IconBulb, description: 'Vorschlag eines KI-Modells zu einem Vorhaben mit gültigem Arbeitskontext festhalten; er ist nur vorgeschlagen, nicht ausgeführt.' },
+  { path: '/intents/vorschlag-entscheiden', label: { de: 'Vorschlag entscheiden', en: 'Decide on proposal' }, icon: IconGavel, description: 'Vorschlag anhand einer gültigen Regel prüfen, Freigabe festhalten und Vorschlagsstatus setzen.' },
+  { path: '/intents/regel-aendern', label: { de: 'Regel ändern', en: 'Change rule' }, icon: IconRuler2, description: 'Neue Fassung einer Regel als Entwurf anlegen, mit Verweis auf die Vorgängerregel; die Wirksamkeit entscheidet erst die Freigabe.' },
+  { path: '/intents/taetigkeit-dokumentieren', label: { de: 'Tätigkeit dokumentieren', en: 'Document activity' }, icon: IconClipboardCheck, description: 'Ausgeführte Tätigkeit zu einem Vorhaben und einer erteilten Freigabe mit Ergebnis und Wirkung festhalten und den Vorschlag als ausgeführt markieren.' },
+  { path: '/intents/erfahrung-festhalten', label: { de: 'Erfahrung festhalten', en: 'Capture experience' }, icon: IconSchool, description: 'Aus einer Tätigkeit gewonnene Erfahrung mit Bezug zu Tätigkeit und Vorhaben erfassen.' },
   // </custom:intents>
 ];
 
@@ -52,7 +59,7 @@ export const INTENTS: IntentLink[] = [
  * purpose — a scaffold update resets it to false (self-healing if Phase 2
  * never ran).
  */
-export const INTENTS_PENDING = true;
+export const INTENTS_PENDING = false;
 
 /**
  * When the Phase-1 bundle was deployed (ISO, set by the service together with

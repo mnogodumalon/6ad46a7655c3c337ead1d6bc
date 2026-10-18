@@ -14,6 +14,13 @@ import { IntentPolicyLoader } from '@/components/IntentPolicyLoader';
 import IntentsAdmin from '@/pages/IntentsAdmin';
 import AppMap from '@/pages/AppMap';
 // <custom:imports>
+const IntentArbeitskontextErfassenPage = lazy(() => import('@/pages/intents/ArbeitskontextErfassenPage'));
+import { DashboardSkeleton } from '@/components/DashboardStates';
+const IntentKiVorschlagErfassenPage = lazy(() => import('@/pages/intents/KiVorschlagErfassenPage'));
+const IntentVorschlagEntscheidenPage = lazy(() => import('@/pages/intents/VorschlagEntscheidenPage'));
+const IntentRegelAendernPage = lazy(() => import('@/pages/intents/RegelAendernPage'));
+const IntentTaetigkeitDokumentierenPage = lazy(() => import('@/pages/intents/TaetigkeitDokumentierenPage'));
+const IntentErfahrungFesthaltenPage = lazy(() => import('@/pages/intents/ErfahrungFesthaltenPage'));
 // </custom:imports>
 
 // Lazy: public pages live outside <Layout> and only load on /#/public/:slug —
@@ -85,6 +92,12 @@ export default function App() {
                 <Route path="verwaltung/oeffentliche-seiten" element={<PublicPagesAdmin />} />
                 <Route path="verwaltung/oeffentliche-seiten/:slug/felder" element={<PublicPageFields />} />
                 {/* <custom:routes> */}
+                <Route path="intents/arbeitskontext-erfassen" element={<Suspense fallback={<DashboardSkeleton />}><IntentArbeitskontextErfassenPage /></Suspense>} />
+                <Route path="intents/ki-vorschlag-erfassen" element={<Suspense fallback={<DashboardSkeleton />}><IntentKiVorschlagErfassenPage /></Suspense>} />
+                <Route path="intents/vorschlag-entscheiden" element={<Suspense fallback={<DashboardSkeleton />}><IntentVorschlagEntscheidenPage /></Suspense>} />
+                <Route path="intents/regel-aendern" element={<Suspense fallback={<DashboardSkeleton />}><IntentRegelAendernPage /></Suspense>} />
+                <Route path="intents/taetigkeit-dokumentieren" element={<Suspense fallback={<DashboardSkeleton />}><IntentTaetigkeitDokumentierenPage /></Suspense>} />
+                <Route path="intents/erfahrung-festhalten" element={<Suspense fallback={<DashboardSkeleton />}><IntentErfahrungFesthaltenPage /></Suspense>} />
                 {/* </custom:routes> */}
                 {/* An unknown hash (a bookmark from before a rebuild renamed the
                     flows, a mistyped link) must not be a blank page. */}

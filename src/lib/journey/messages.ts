@@ -45,6 +45,15 @@ export type MessageFieldKey<E extends EntityKey> = E extends keyof MessageFields
 
 export const REQUIRED_MESSAGES: { [E in EntityKey]?: Partial<Record<MessageFieldKey<E>, string>> } = {
   // <custom:messages>
+  nutzer: { vorname: "Bitte den Vornamen eingeben.", nachname: "Bitte den Nachnamen eingeben.", email: "Bitte die E-Mail-Adresse eingeben.", rolle: "Bitte eine Rolle wählen.", berechtigungsstufe: "Bitte eine Berechtigungsstufe wählen." },
+  ki_modelle: { bezeichnung: "Bitte die Bezeichnung des Modells eingeben.", status: "Bitte den Status des Modells wählen." },
+  vorhaben: { titel: "Bitte einen Titel eingeben.", ausgangssituation: "Bitte die Ausgangssituation beschreiben.", ziel: "Bitte das Ziel beschreiben.", verantwortlicher: "Bitte einen Verantwortlichen wählen.", status: "Bitte den Status des Vorhabens wählen." },
+  regeln: { bezeichnung: "Bitte eine Bezeichnung eingeben.", regeltyp: "Bitte einen Regeltyp wählen.", erforderliche_stufe: "Bitte die erforderliche Stufe wählen.", status: "Bitte den Status der Regel wählen." },
+  arbeitskontexte: { vorhaben: "Bitte ein Vorhaben wählen.", versionsnummer: "Bitte die Versionsnummer eingeben.", aktueller_zustand: "Bitte den aktuellen Zustand beschreiben.", gueltigkeitsstatus: "Bitte die Gültigkeit wählen.", erfasst_von: "Bitte den Erfasser wählen.", zeitpunkt: "Bitte den Zeitpunkt wählen." },
+  ki_vorschlaege: { vorhaben: "Bitte ein Vorhaben wählen.", modell: "Bitte ein KI-Modell wählen.", art: "Bitte die Art des Vorschlags wählen.", inhalt: "Bitte den Inhalt des Vorschlags eingeben.", status: "Bitte den Status des Vorschlags wählen.", arbeitskontext: "Bitte einen Arbeitskontext wählen." },
+  freigaben: { entscheider: "Bitte einen Entscheider wählen.", regelpruefung: "Bitte das Ergebnis der Regelprüfung wählen.", entscheidung: "Bitte die Entscheidung wählen.", entscheidungszeitpunkt: "Bitte den Zeitpunkt der Entscheidung wählen.", vorschlag: "Bitte einen Vorschlag wählen.", angewendete_regel: "Bitte die angewendete Regel wählen." },
+  taetigkeiten: { vorhaben: "Bitte ein Vorhaben wählen.", beschreibung: "Bitte die Tätigkeit beschreiben.", ausfuehrender: "Bitte den Ausführenden wählen.", zeitpunkt: "Bitte den Zeitpunkt der Ausführung wählen." },
+  erfahrungen: { titel: "Bitte einen Titel eingeben.", beschreibung: "Bitte die Erfahrung beschreiben.", erfasst_von: "Bitte den Erfasser wählen." },
   // </custom:messages>
 };
 
